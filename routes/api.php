@@ -22,3 +22,11 @@ use Illuminate\Support\Facades\Route;
 Route::prefix("/user")->group( function (){
     Route::post("/login", "api\authorizationController@personalAccessLogin");
 });
+
+
+Route::prefix("/student")->group( function (){
+    
+    Route::middleware("auth:api")->get("/module/{moduleId}", "api\studentController@getModule");
+
+
+});
