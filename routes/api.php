@@ -27,6 +27,7 @@ Route::prefix("/user")->group( function (){
 Route::prefix("/student")->group( function (){
     
     Route::middleware("auth:api")->get("/module/{moduleId}", "api\studentController@getModule");
+    Route::middleware("auth:api")->get("/modules/{course_type?}", "api\studentController@getCourses");
 
 
 });
