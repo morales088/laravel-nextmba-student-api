@@ -51,46 +51,60 @@ class studentController extends Controller
         if($request->course_type == 'active'){
             // active
             $courses = DB::SELECT("select *
-                                from
-                                (select c.*,
-                                SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
-                                SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) AS `complete_modules`,
-                                count(sm.id) total_st_modules,
-                                ROUND( ( (SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
-                                from courses c
-                                left join modules m ON m.courseId = c.id
-                                left join student_modules sm ON m.id = sm.moduleId
-                                where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sm.studentId = $userId
-                                group by c.id) c where c.score_percentage < 100");
+                                    from
+                                    (select c.*, sc.starting, sc.expirationDate,
+                                    SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+                                    SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+                                    count(sm.id) total_st_modules,
+                                    ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
+                                    from courses c
+                                    left join modules m ON m.courseId = c.id
+                                    left join student_modules sm ON m.id = sm.moduleId
+                                    left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+                                    where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
+                                    group by c.id) c where c.score_percentage < 100");
 
 
         }elseif($request->course_type == 'completed'){
             // complete
             $courses = DB::SELECT("select *
-                from
-                (select c.*,
-                SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
-                SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) AS `complete_modules`,
-                count(sm.id) total_st_modules,
-                ROUND( ( (SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
-                from courses c
-                left join modules m ON m.courseId = c.id
-                left join student_modules sm ON m.id = sm.moduleId
-                where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sm.studentId = $userId
-                group by c.id) c where c.score_percentage = 100");
+                                    from
+                                    (select c.*, sc.starting, sc.expirationDate,
+                                    SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+                                    SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+                                    count(sm.id) total_st_modules,
+                                    ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
+                                    from courses c
+                                    left join modules m ON m.courseId = c.id
+                                    left join student_modules sm ON m.id = sm.moduleId
+                                    left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+                                    where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
+                                    group by c.id) c where c.score_percentage = 100");
         }else{
             // all
-            $courses = DB::SELECT("select c.*,
-                SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
-                SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) AS `complete_modules`,
-                count(sm.id) total_st_modules,
-                ROUND( ( (SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) percentage,
-                sm.studentId
-                from courses c
-                left join modules m ON m.courseId = c.id
-                left join student_modules sm ON m.id = sm.moduleId
-                where c.status <> 0 or m.status <> 0 or sm.status <> 0
-                group by c.id");
+            // $courses = DB::SELECT("select c.*,
+            //     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+            //     SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) AS `complete_modules`,
+            //     count(sm.id) total_st_modules,
+            //     ROUND( ( (SUM(CASE WHEN sm.status = 2 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) percentage,
+            //     sm.studentId
+            //     from courses c
+            //     left join modules m ON m.courseId = c.id
+            //     left join student_modules sm ON m.id = sm.moduleId
+            //     where c.status <> 0 or m.status <> 0 or sm.status <> 0
+            //     group by c.id");
+            $courses = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
+            
+            foreach ($courses as $key => $value) {
+                $check = COLLECT(\DB::SELECT("SELECT * FROM studentcourses sc where sc.studentId = $userId and sc.courseId = $value->id"))->first();
+                if($check){
+                    $value->starting = $check->starting;
+                    $value->expirationDate = $check->expirationDate;
+                }else{
+                    $value->starting = null;
+                    $value->expirationDate = null;
+                }
+            }
 
         }
 
@@ -137,7 +151,7 @@ class studentController extends Controller
                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                     and t.moduleId = $value->id");
         }
-        return response(["live_modules" => $live_modules], 200);
+        return response(["modules" => $live_modules], 200);
     }
 
     public function getupcomingModules(Request $request){
@@ -161,20 +175,20 @@ class studentController extends Controller
                                         and t.moduleId = $value->id");
         }
 
-        return response(["upcoming_modules" => $upcoming_modules], 200);
+        return response(["modules" => $upcoming_modules], 200);
     }
 
     public static function getCourses(Request $request, $id = 0){
         $userId = auth('api')->user()->id;
 
         if($id){
-            $courses = DB::SELECT("select c.*,
+            $courses = COLLECT(\DB::SELECT("select c.*,
                                 ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
                                 where m. status <> 0 and sm.status <> 0 and c.status <> 0
-                                and sm.studentId = $userId and c.id = $id group by c.id");
+                                and sm.studentId = $userId and c.id = $id group by c.id"))->first();
         }else{
             $courses = DB::SELECT("select c.*,
                                 ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
