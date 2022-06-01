@@ -26,8 +26,16 @@ Route::prefix("/user")->group( function (){
 
 Route::prefix("/student")->group( function (){
     
+    
+
+    Route::middleware("auth:api")->get("/courses/{id?}", "api\studentController@getCourses");
+    Route::middleware("auth:api")->get("/courses/{course_type?}", "api\studentController@getCoursesByType");
+
     Route::middleware("auth:api")->get("/module/{moduleId}", "api\studentController@getModule");
-    Route::middleware("auth:api")->get("/modules/{course_type?}", "api\studentController@getCourses");
+
+    Route::middleware("auth:api")->get("/modules/live", "api\studentController@getLiveModules");
+    Route::middleware("auth:api")->get("/modules/upcoming", "api\studentController@getupcomingModules");
+    Route::middleware("auth:api")->get("/", "api\studentController@getStudentInfo");
 
 
 });
