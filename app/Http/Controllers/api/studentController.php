@@ -217,6 +217,7 @@ class studentController extends Controller
                                                 left join modules m ON sm.moduleId = m.id
                                                 where m.end_date < '".now()."' and sm.studentId = $userId");
         }
-        dd($courses);
+        // dd($courses);
+        return response(["past_mopdules" => $courses], 200);
     }
 }
