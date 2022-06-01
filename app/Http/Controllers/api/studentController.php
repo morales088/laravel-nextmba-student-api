@@ -36,7 +36,7 @@ class studentController extends Controller
         return response(["student_module" => $student_module], 200);
     }
 
-    public function getCourses(Request $request, $course_type = 'all'){
+    public function getCoursesByType(Request $request, $course_type = 'all'){
         
         $userId = auth('api')->user()->id;
         $request->query->add(['course_type' => $course_type]);
@@ -96,5 +96,95 @@ class studentController extends Controller
 
         // dd($courses);
         return response(["courses" => $courses, "type" => $request->course_type], 200);
+    }
+
+    public function getStudentInfo(Request $request){
+        $userId = auth('api')->user()->id;
+
+        $request->query->add(['id' => $userId]);
+
+        $request->validate([
+            'id' => 'numeric|min:1|exists:students,id',
+        ]);
+        
+        $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login
+                                from students s where id = $request->id"))->first();
+                                
+        $student->links = DB::SELECT("select * from links where studentId = $student->id");
+
+
+
+        return response(["student" => $student], 200);
+    }
+
+    public function getLiveModules(Request $request){
+        
+        $userId = auth('api')->user()->id;
+
+        $live_modules = DB::SELECT("select m.*, c.name course_name
+        from student_modules sm
+        left join modules m ON m.id = sm.moduleId
+        left join courses c on m.courseId = c.id
+        where m.broadcast_status = 2 and m. status <> 0 and sm.status <> 0 and c.status <> 0 and
+        sm.studentId = $userId");
+
+        foreach ($live_modules as $key => $value) {
+        $value->topics = DB::SELECT("select t.moduleId, s.*, sr.role,
+                    (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                    from topics t
+                    left join speaker_roles sr ON t.id = sr.topicId
+                    left join speakers s on t.speakerId = s.id
+                    where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                    and t.moduleId = $value->id");
+        }
+        return response(["live_modules" => $live_modules], 200);
+    }
+
+    public function getupcomingModules(Request $request){
+        
+        $userId = auth('api')->user()->id;
+
+        $upcoming_modules = DB::SELECT("select m.*, c.name course_name
+                                        from student_modules sm
+                                        left join modules m ON m.id = sm.moduleId
+                                        left join courses c on m.courseId = c.id
+                                        where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                        and sm.studentId = 1 and  m.broadcast_status = $student->id and m.start_date > '".now()."'");
+                                        
+        foreach ($upcoming_modules as $key => $value) {
+            $value->topics = DB::SELECT("select t.moduleId, s.*, sr.role,
+                                        (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                                        from topics t
+                                        left join speaker_roles sr ON t.id = sr.topicId
+                                        left join speakers s on t.speakerId = s.id
+                                        where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                                        and t.moduleId = $value->id");
+        }
+
+        return response(["upcoming_modules" => $upcoming_modules], 200);
+    }
+
+    public static function getCourses(Request $request, $id = 0){
+        $userId = auth('api')->user()->id;
+
+        if($id){
+            $courses = DB::SELECT("select c.*,
+                                ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
+                                from student_modules sm
+                                left join modules m ON m.id = sm.moduleId
+                                left join courses c on m.courseId = c.id
+                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                and sm.studentId = $userId and c.id = $id group by c.id");
+        }else{
+            $courses = DB::SELECT("select c.*,
+                                ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
+                                from student_modules sm
+                                left join modules m ON m.id = sm.moduleId
+                                left join courses c on m.courseId = c.id
+                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                and sm.studentId = $userId group by c.id");
+        }
+
+        return response(["course" => $courses], 200);
     }
 }
