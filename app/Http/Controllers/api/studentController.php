@@ -93,16 +93,28 @@ class studentController extends Controller
             //     left join student_modules sm ON m.id = sm.moduleId
             //     where c.status <> 0 or m.status <> 0 or sm.status <> 0
             //     group by c.id");
+
             $courses = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
             
             foreach ($courses as $key => $value) {
-                $check = COLLECT(\DB::SELECT("SELECT * FROM studentcourses sc where sc.studentId = $userId and sc.courseId = $value->id"))->first();
+                $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+                                                SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+                                                SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+                                                count(sm.id) total_st_modules,
+                                                ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
+                                                from courses c
+                                                left join modules m ON m.courseId = c.id
+                                                left join student_modules sm ON m.id = sm.moduleId
+                                                left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+                                                where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
+                                                // dd($check);
                 if($check){
                     $value->starting = $check->starting;
                     $value->expirationDate = $check->expirationDate;
-                }else{
-                    $value->starting = null;
-                    $value->expirationDate = null;
+                    $value->incomple_modules = $check->incomple_modules;
+                    $value->complete_modules = $check->complete_modules;
+                    $value->total_st_modules = $check->total_st_modules;
+                    $value->score_percentage = $check->score_percentage;
                 }
             }
 
@@ -232,6 +244,6 @@ class studentController extends Controller
                                                 where m.end_date < '".now()."' and sm.studentId = $userId");
         }
         // dd($courses);
-        return response(["mopdules" => $courses], 200);
+        return response(["courses" => $courses], 200);
     }
 }
