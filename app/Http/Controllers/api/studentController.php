@@ -50,7 +50,7 @@ class studentController extends Controller
         
         if($request->course_type == 'active'){
             // active
-            $courses = DB::SELECT("select *
+            $courses = DB::SELECT("select *                                
                                     from
                                     (select c.*, sc.starting, sc.expirationDate,
                                     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
@@ -63,7 +63,7 @@ class studentController extends Controller
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                     where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage < 100");
-
+                                    
 
         }elseif($request->course_type == 'completed'){
             // complete
@@ -154,7 +154,7 @@ class studentController extends Controller
         return response(["modules" => $live_modules], 200);
     }
 
-    public function getupcomingModules(Request $request){
+    public function getUpcomingModules(Request $request){
         
         $userId = auth('api')->user()->id;
 
@@ -200,5 +200,38 @@ class studentController extends Controller
         }
 
         return response(["course" => $courses], 200);
+    }
+    
+    public function getuPastModules(Request $request, $course_id = 0){
+        
+        $userId = auth('api')->user()->id;
+
+        // $request->query->add(['course_id' => $course_id]);
+
+        // $request->validate([
+        //     'course_id' => 'numeric|min:1|exists:courses,id',
+        // ]);
+
+        $courseQuery = null;
+        if($course_id){
+            $courseQuery = "and c.id = $course_id";
+        }
+
+        $courses = DB::SELECT("select c.*
+                                from student_modules sm
+                                left join modules m ON m.id = sm.moduleId
+                                left join courses c on m.courseId = c.id
+                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                and sm.studentId = 1 $courseQuery group by c.id");
+
+        foreach ($courses as $key => $value) {
+            $value->past_module = DB::SELECT("select m.*,
+                                                (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
+                                                from student_modules sm
+                                                left join modules m ON sm.moduleId = m.id
+                                                where m.end_date < '".now()."' and sm.studentId = $userId");
+        }
+        // dd($courses);
+        return response(["mopdules" => $courses], 200);
     }
 }
