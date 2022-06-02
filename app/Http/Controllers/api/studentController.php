@@ -263,7 +263,7 @@ class studentController extends Controller
         ]);
 
         $modules = Module::getModules($userId, $course_id, $modules_type);
-                
+        
         return response(["modules" => $modules], 200);
     }
 }
