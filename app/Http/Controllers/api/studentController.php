@@ -62,7 +62,7 @@ class studentController extends Controller
                                     left join modules m ON m.courseId = c.id
                                     left join student_modules sm ON m.id = sm.moduleId
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                    where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
+                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage < 100");
                                     
 
@@ -79,7 +79,7 @@ class studentController extends Controller
                                     left join modules m ON m.courseId = c.id
                                     left join student_modules sm ON m.id = sm.moduleId
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                    where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
+                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage = 100");
         }else{
             // all
@@ -107,7 +107,7 @@ class studentController extends Controller
                                                 left join modules m ON m.courseId = c.id
                                                 left join student_modules sm ON m.id = sm.moduleId
                                                 left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                                where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
+                                                where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
                                                 // dd($check);
                 if($check){
                     $value->starting = $check->starting;
@@ -175,7 +175,7 @@ class studentController extends Controller
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
-                                        where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                        where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                         and sm.studentId = 1 and  m.broadcast_status = $userId and m.start_date > '".now()."'");
                                         
         foreach ($upcoming_modules as $key => $value) {
@@ -200,7 +200,7 @@ class studentController extends Controller
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
-                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId and c.id = $id group by c.id"))->first();
         }else{
             $courses = DB::SELECT("select c.*,
@@ -208,7 +208,7 @@ class studentController extends Controller
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
-                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId group by c.id");
         }
 
