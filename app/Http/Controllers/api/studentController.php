@@ -5,8 +5,12 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Module;
+use App\Models\Student;
+use App\Models\Link;
 use DB;
+
 
 class studentController extends Controller
 {
@@ -265,5 +269,69 @@ class studentController extends Controller
         $modules = Module::getModules($userId, $course_id, $modules_type);
         
         return response(["modules" => $modules], 200);
+    }
+
+    public function updateStudent(Request $request){
+        $userId = auth('api')->user()->id;
+
+        $request->validate([
+            // 'course_id' => 'numeric|min:1|exists:modules,id',
+            // 'modules_type' => [
+            //             'string',
+            //             Rule::in(['live', 'upcoming', 'past']),
+            //         ],
+        ]);
+
+        if($request->password){
+            $request->password = Hash::make(request->password);
+        }
+
+        $student = Student::find($userId);
+        
+        $student->update($request->only('name', 'email', 'password', 'phone', 'location', 'company', 'position', 'field') +
+                        [ 'updated_at' => now()]
+                        );
+
+        // update student links
+        $links = [];
+
+        ($request->LI)? $links += ['li' => addslashes($request->LI)] : '';
+        ($request->IG)? $links += ['ig' => addslashes($request->IG)] : '';
+        ($request->FB)? $links += ['fb' => addslashes($request->FB)] : '';
+        ($request->TG)? $links += ['tg' => addslashes($request->TG)] : '';
+        ($request->WS)? $links += ['ws' => addslashes($request->WS)] : '';
+                        // dd($links);
+        foreach ($links as $key => $value) {
+            // $link = collect(\DB::SELECT("SELECT * FROM links where studentId = $id and name = '$key'"))->first();
+
+            $link = Link::where('studentId', $userId)->where('name', $key)->where('status', '<>', 0)->first();
+            
+            if($link){
+                $link->update(
+                [ 
+                    'link' => $value,
+                    'updated_at' => now()
+                ]
+                );
+            }else{
+                Link::create($request->only('icon') + 
+                [
+                    'studentId' => $userId,
+                    'name' => $key,
+                    'link' => $value
+                ]);
+            }
+
+        }
+
+        $studentInfos =  Student::find($userId);
+
+        $studentLinks =  Link::where('studentId', $userId)->get();
+        
+        $studentInfos->links = $studentLinks;
+
+        // dd($request->all(), $studentInfos);
+
+        return response(["student" => $studentInfos], 200);
     }
 }

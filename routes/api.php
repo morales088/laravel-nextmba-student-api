@@ -39,5 +39,7 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/modules/upcoming", "api\studentController@getUpcomingModules");
     Route::middleware("auth:api")->get("/", "api\studentController@getStudentInfo");
 
+    Route::middleware("auth:api")->put("/update", "api\studentController@updateStudent");
+
 
 });
