@@ -281,25 +281,22 @@ class studentController extends Controller
             //             Rule::in(['live', 'upcoming', 'past']),
             //         ],
         ]);
-
-        if($request->password){
-            $request->password = Hash::make(request->password);
-        }
+        // dd($request->all(), $request->has('LI'));
 
         $student = Student::find($userId);
         
-        $student->update($request->only('name', 'email', 'password', 'phone', 'location', 'company', 'position', 'field') +
+        $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field') +
                         [ 'updated_at' => now()]
                         );
 
         // update student links
         $links = [];
 
-        ($request->LI)? $links += ['li' => addslashes($request->LI)] : '';
-        ($request->IG)? $links += ['ig' => addslashes($request->IG)] : '';
-        ($request->FB)? $links += ['fb' => addslashes($request->FB)] : '';
-        ($request->TG)? $links += ['tg' => addslashes($request->TG)] : '';
-        ($request->WS)? $links += ['ws' => addslashes($request->WS)] : '';
+        ($request->has('LI'))? $links += ['li' => addslashes($request->LI)] : '';
+        ($request->has('IG'))? $links += ['ig' => addslashes($request->IG)] : '';
+        ($request->has('FB'))? $links += ['fb' => addslashes($request->FB)] : '';
+        ($request->has('TG'))? $links += ['tg' => addslashes($request->TG)] : '';
+        ($request->has('WS'))? $links += ['ws' => addslashes($request->WS)] : '';
                         // dd($links);
         foreach ($links as $key => $value) {
             // $link = collect(\DB::SELECT("SELECT * FROM links where studentId = $id and name = '$key'"))->first();
