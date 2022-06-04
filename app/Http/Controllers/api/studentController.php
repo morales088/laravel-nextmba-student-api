@@ -334,4 +334,33 @@ class studentController extends Controller
 
         return response(["student" => $studentInfos], 200);
     }
+
+    public function updatePasword(Request $request){
+        $userId = auth('api')->user()->id;
+
+        $request->validate([
+            // 'course_id' => 'numeric|min:1|exists:modules,id',
+            'old_password' => 'required|string',
+            'new_password' => 'required|string',
+        ]);
+
+        $student = Student::find($userId);
+
+        // $old_password = $request->old_password = Hash::make($request->old_password);
+
+        if(Hash::check($request->old_password, $student->password)){
+            $student->update(
+                            [
+                                'password' => Hash::make($request->new_password),
+                                'updated_at' => now()
+                            ]
+                            );
+        }else{
+            return response(["message" => "password does not match"], 409);
+        }
+        
+        // dd(Hash::make($request->old_password), $student->password);
+        
+        return response(["student" => $student], 200);
+    }
 }

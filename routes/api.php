@@ -40,6 +40,7 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/", "api\studentController@getStudentInfo");
 
     Route::middleware("auth:api")->put("/update", "api\studentController@updateStudent");
+    Route::middleware("auth:api")->put("/password", "api\studentController@updatePasword");
 
 
 });
