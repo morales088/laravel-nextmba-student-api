@@ -364,4 +364,19 @@ class studentController extends Controller
         
         return response(["student" => $student], 200);
     }
+    
+    public function updateStudentModule(Request $request){
+        $userId = auth('api')->user()->id;
+
+        $request->validate([
+            'module_id' => 'required|numeric|min:1|exists:modules,id',
+        ]);
+
+        DB::table('student_modules')
+                        ->where('studentId', $userId)
+                        ->where('moduleId', $request->module_id)
+                        ->update(['status' => '3', 'updated_at' => now()]);
+
+        return response(["message" => "successfully updated student module's status"], 200);
+    }
 }
