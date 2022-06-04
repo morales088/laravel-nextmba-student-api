@@ -210,11 +210,12 @@ class studentController extends Controller
                                 where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId and c.id = $id group by c.id"))->first();
         }else{
-            $courses = DB::SELECT("select c.*,
+            $courses = DB::SELECT("select c.*, sc.starting start_date, sc.expirationDate expiration_date,
                                 ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
+                                left join studentcourses sc ON sc.courseId = c.id and sm.studentId = sc.studentId
                                 where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId group by c.id");
         }
