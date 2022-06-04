@@ -51,13 +51,14 @@ class Module extends Model
             if($modules){
                 foreach ($modules as $key => $value) {
 
-                    $value->topics = DB::SELECT("select t.moduleId, t.*, sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_poisiton, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path,
-                                        (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
-                                        from topics t
-                                        left join speaker_roles sr ON t.id = sr.topicId
-                                        left join speakers s on t.speakerId = s.id
-                                        where t.status <> 0 and sr.status <> 0 and s.status <> 0
-                                        and t.moduleId = $value->id");
+                    $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                                                    sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_poisiton, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path,
+                                                    (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                                                    from topics t
+                                                    left join speaker_roles sr ON t.id = sr.topicId
+                                                    left join speakers s on t.speakerId = s.id
+                                                    where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                                                    and t.moduleId = $value->id");
                 }
             }
             
