@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
@@ -388,5 +389,38 @@ class studentController extends Controller
         $billing = DB::SELECT("SELECT * FROM payments where student_id = $userId");
 
         return response(["billing" => $billing], 200);
+    }
+
+    public function refund(Request $request){
+        $userId = auth('api')->user()->id;
+        $api_key = env('HITPAY_API_TOKEN');
+        $api_link = env('HITPAY_API_LINK');
+
+        $request->validate([
+            'payment_id' => 'required|numeric|min:1|exists:payments,id',
+        ]);
+
+        $payment_info = collect(\DB::SELECT("SELECT * FROM payments where id = $request->payment_id"))->first();;
+
+        dd($userId, $api_key, $api_link, $payment_info);
+
+        $response = Http::withHeaders([
+            'X-BUSINESS-API-KEY' => $api_key,
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Content-Type' => 'application/x-www-form-urlencoded'
+        ])->post($api_link, [
+            'amount' => $payment_info->price,
+            'payment_id' => $payment_info->hitpay_id,
+        ]);
+
+        dd($response);
+
+        
+        if($response->serverError()){
+            return response()->json(["message" => "Internal Server Error"], 500);
+        }
+
+        return response(["message" => "successfully refunded this course ($payment_info->product)"], 200);
+
     }
 }
