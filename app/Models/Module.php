@@ -28,7 +28,7 @@ class Module extends Model
 
                 foreach ($modules as $key => $value) {
 
-                    $value->topics = DB::SELECT("t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                    $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                     sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_poisiton, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path,
                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                     from topics t
@@ -74,7 +74,7 @@ class Module extends Model
             if($modules){
                 foreach ($modules as $key => $value) {
 
-                    $value->topics = DB::SELECT("t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                    $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                         sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_poisiton, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path,
                                         (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                                         from topics t

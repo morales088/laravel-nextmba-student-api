@@ -161,13 +161,14 @@ class studentController extends Controller
         sm.studentId = $userId");
 
         foreach ($live_modules as $key => $value) {
-        $value->topics = DB::SELECT("select t.moduleId, s.*, sr.role,
-                    (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
-                    from topics t
-                    left join speaker_roles sr ON t.id = sr.topicId
-                    left join speakers s on t.speakerId = s.id
-                    where t.status <> 0 and sr.status <> 0 and s.status <> 0
-                    and t.moduleId = $value->id");
+        $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                            s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
+                            (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                            from topics t
+                            left join speaker_roles sr ON t.id = sr.topicId
+                            left join speakers s on t.speakerId = s.id
+                            where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                            and t.moduleId = $value->id");
         }
         return response(["modules" => $live_modules], 200);
     }
