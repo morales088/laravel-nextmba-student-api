@@ -381,4 +381,12 @@ class studentController extends Controller
 
         return response(["message" => "successfully updated student module's status"], 200);
     }
+
+    public function getBilling(Request $request){
+        $userId = auth('api')->user()->id;
+
+        $billing = DB::SELECT("SELECT * FROM payments where student_id = $userId");
+
+        return response(["billing" => $billing], 200);
+    }
 }
