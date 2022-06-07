@@ -400,27 +400,39 @@ class studentController extends Controller
             'payment_id' => 'required|numeric|min:1|exists:payments,id',
         ]);
 
-        $payment_info = collect(\DB::SELECT("SELECT * FROM payments where id = $request->payment_id"))->first();;
-
-        dd($userId, $api_key, $api_link, $payment_info);
-
-        $response = Http::withHeaders([
+        $payment_info = collect(\DB::SELECT("SELECT * FROM payments where id = $request->payment_id"))->first();
+        
+        $response = Http::asForm()->withHeaders([
             'X-BUSINESS-API-KEY' => $api_key,
             'X-Requested-With' => 'XMLHttpRequest',
             'Content-Type' => 'application/x-www-form-urlencoded'
-        ])->post($api_link, [
+        ])->post($api_link.'/refund', [
             'amount' => $payment_info->price,
             'payment_id' => $payment_info->hitpay_id,
         ]);
 
-        dd($response);
-
+        // dd($response, $response->serverError(), $response->successful(), $response->failed());
         
-        if($response->serverError()){
-            return response()->json(["message" => "Internal Server Error"], 500);
+        if($response->successful()){
+
+            DB::table('payments')
+                        ->where('id', $payment_info->id)
+                        ->update(['status' => 'Refunded', 'updated_at' => now()]);
+            
+            $payment_items = DB::SELECT("select * from payment_items where payment_id = $payment_info->id");
+
+            foreach ($payment_items as $key => $value) {
+                
+                DB::table('studentcourses')
+                ->where('studentId', $payment_info->student_id)
+                ->where('courseId', $value->product_id)
+                ->update(['status' => 0, 'updated_at' => now()]);
+            }
+            
+            return response(["message" => "successfully refunded this course ($payment_info->product)"], 200);
         }
 
-        return response(["message" => "successfully refunded this course ($payment_info->product)"], 200);
+        return response()->json(["message" => "transaction failed"], 422);
 
     }
 }
