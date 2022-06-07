@@ -45,4 +45,16 @@ class Student extends Authenticatable
     // protected $casts = [
     //     'email_verified_at' => 'datetime',
     // ];
+
+    public static function generate_password($length = 20){
+        $chars =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      
+        $str = '';
+        $max = strlen($chars) - 1;
+      
+        for ($i=0; $i < $length; $i++)
+          $str .= $chars[random_int(0, $max)];
+      
+        return $str;
+    }
 }
