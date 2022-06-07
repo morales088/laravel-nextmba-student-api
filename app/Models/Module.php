@@ -82,6 +82,8 @@ class Module extends Model
                                         left join speakers s on t.speakerId = s.id
                                         where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                         and t.moduleId = $value->id");
+
+                    $value->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $value->id and status <> 0");
                 }
             }
         }
