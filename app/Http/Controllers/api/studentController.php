@@ -40,6 +40,8 @@ class studentController extends Controller
                                                 where sm.status <> 0 and t.status <> 0 and s.status <> 0
                                                 and sm.moduleId = $moduleId and sm.studentId = $userId");
 
+        $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
+
         // dd($request->all(), $student_module);
         return response(["student_module" => $student_module], 200);
     }
@@ -389,50 +391,5 @@ class studentController extends Controller
         $billing = DB::SELECT("SELECT * FROM payments where student_id = $userId");
 
         return response(["billing" => $billing], 200);
-    }
-
-    public function refund(Request $request){
-        $userId = auth('api')->user()->id;
-        $api_key = env('HITPAY_API_TOKEN');
-        $api_link = env('HITPAY_API_LINK');
-
-        $request->validate([
-            'payment_id' => 'required|numeric|min:1|exists:payments,id',
-        ]);
-
-        $payment_info = collect(\DB::SELECT("SELECT * FROM payments where id = $request->payment_id"))->first();
-        
-        $response = Http::asForm()->withHeaders([
-            'X-BUSINESS-API-KEY' => $api_key,
-            'X-Requested-With' => 'XMLHttpRequest',
-            'Content-Type' => 'application/x-www-form-urlencoded'
-        ])->post($api_link.'/refund', [
-            'amount' => $payment_info->price,
-            'payment_id' => $payment_info->hitpay_id,
-        ]);
-
-        // dd($response, $response->serverError(), $response->successful(), $response->failed());
-        
-        if($response->successful()){
-
-            DB::table('payments')
-                        ->where('id', $payment_info->id)
-                        ->update(['status' => 'Refunded', 'updated_at' => now()]);
-            
-            $payment_items = DB::SELECT("select * from payment_items where payment_id = $payment_info->id");
-
-            foreach ($payment_items as $key => $value) {
-                
-                DB::table('studentcourses')
-                ->where('studentId', $payment_info->student_id)
-                ->where('courseId', $value->product_id)
-                ->update(['status' => 0, 'updated_at' => now()]);
-            }
-            
-            return response(["message" => "successfully refunded this course ($payment_info->product)"], 200);
-        }
-
-        return response()->json(["message" => "transaction failed"], 422);
-
     }
 }
