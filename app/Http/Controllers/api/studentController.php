@@ -40,6 +40,8 @@ class studentController extends Controller
                                                 where sm.status <> 0 and t.status <> 0 and s.status <> 0
                                                 and sm.moduleId = $moduleId and sm.studentId = $userId");
 
+        $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
+
         // dd($request->all(), $student_module);
         return response(["student_module" => $student_module], 200);
     }
