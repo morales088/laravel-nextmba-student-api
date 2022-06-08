@@ -4,6 +4,9 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Mail;
+use App\Mail\AccountCredentialEmail;
+use App\Mail\GiftEmail;
 use App\Models\Courseinvitation;
 use App\Models\Studentcourse;
 use App\Models\Student;
@@ -56,12 +59,24 @@ class giftController extends Controller
         // dd($md5, $code, $md52);
         
         // check if there is course slot from user id
-        $check = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
-        // dd($check, --$check->quantity);
+        $check_qty = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
+        $check_recipient_course = DB::SELECT("select *
+                    from students s
+                    left join studentcourses sc ON s.id = sc.studentId
+                    where s.status <> 0 and sc.status <> 0 and s.email = '$request->email' and sc.courseId = $request->course_id");
+        // dd($check_qty, !empty($check_recipient_course));
 
-        if($check->quantity < 0){
-            return response()->json(["message" => "unable to process request"], 422);
+        if($check_qty->quantity < 0 || !empty($check_recipient_course)){
+            return response()->json(["message" => "zero courses available / recipient already has this course"], 422);
         }
+
+        // dd($check, $sender);
+        
+        //generate link
+        $sender = Student::find($userId);
+        $course = COLLECT(\DB::SELECT("SELECT * FROM courses where id = $request->course_id"))->first();
+        
+        dd($user);
 
         // insert data to course_invitations
         Courseinvitation::create($request->only('icon') + 
@@ -81,14 +96,21 @@ class giftController extends Controller
 
 
         
-        // check if email is already registered (true: add data to studentcourses and student_modules)
+        // check if email is already registered / already 
         $recipient = COLLECT(\DB::SELECT("SELECT * FROM students where email = '$request->email' and status <> 0"))->first();
 
         if(empty($recipient)){
             //generate link
             $link = "$fe_link/register/invite/$code/?email=$request->email";
-            dd($link);
+
             // send link to email **********************
+                    
+            $user = [
+                'email_sender' => $sender->email,
+                'course' => $course->name,
+                'link' => $link,
+            ];
+            Mail::to($request->email)->send(new GiftEmail($user));
 
             return response(["message" => "course sent to $request->email"], 200);
         }
@@ -99,6 +121,12 @@ class giftController extends Controller
         Studentcourse::insertStudentCourse($data);
 
         // notify user via email **********************
+        $user = [
+            'email_sender' => $sender->email,
+            'course' => $course->name
+        ];
+        
+        Mail::to($request->email)->send(new GiftEmail($user));
 
         return response(["message" => "course sent to $request->email"], 200);
 
@@ -143,6 +171,11 @@ class giftController extends Controller
         ];
 
         // send email *******
+        $user = [
+            'email' => $request->email,
+            'password' => $password
+        ];
+        Mail::to($request->email)->send(new AccountCredentialEmail($user));
 
         return response(["message" => "success", "student" => $student], 200);
     }
