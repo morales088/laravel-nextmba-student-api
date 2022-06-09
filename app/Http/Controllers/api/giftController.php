@@ -94,8 +94,8 @@ class giftController extends Controller
 
         // minus qty to student courses
         DB::table('studentcourses')
-                        ->where('id', $check->id)
-                        ->update(['quantity' => --$check->quantity, 'updated_at' => now()]);
+                        ->where('id', $check_qty->id)
+                        ->update(['quantity' => --$check_qty->quantity, 'updated_at' => now()]);
 
 
         
