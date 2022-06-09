@@ -158,6 +158,11 @@ class giftController extends Controller
         if(empty($check)){
             return response()->json(["message" => "unable to process request (wrong email or wrong hash)"], 422);
         }
+
+        // dd($check);
+        DB::table('course_invitations')
+                        ->where('id', $check[0]->id)
+                        ->update(['status' => 2, 'updated_at' => now()]);
         
         $password = Student::generate_password();
         // dd($password);
