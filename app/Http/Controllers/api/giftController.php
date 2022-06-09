@@ -28,7 +28,10 @@ class giftController extends Controller
 
             $owner = DB::SELECT("SELECT email FROM students where id = $userId and status <> 0");
 
-            $gift = DB::SELECT("SELECT concat(email, ' (', (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) ,')') email FROM course_invitations where from_student_id = $userId and from_payment_id = $value->payment_id and course_id = $value->course_id and status <> 0");
+            $gift = DB::SELECT("SELECT email,
+                                    id gift_id,
+                                    (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) status FROM course_invitations 
+                                    where from_student_id = $userId and from_payment_id = $value->payment_id and course_id = $value->course_id and status <> 0");
 
             foreach ($gift as $key2 => $value2) {
                 array_push($owner, $value2);
@@ -76,7 +79,7 @@ class giftController extends Controller
         $sender = Student::find($userId);
         $course = COLLECT(\DB::SELECT("SELECT * FROM courses where id = $request->course_id"))->first();
         
-        dd($user);
+        // dd($user);
 
         // insert data to course_invitations
         Courseinvitation::create($request->only('icon') + 
