@@ -104,7 +104,8 @@ class giftController extends Controller
 
         if(empty($recipient)){
             //generate link
-            $link = "$fe_link/register/invite/$code/?email=$request->email";
+            // $link = "$fe_link/register/invite/$code/?email=$request->email";
+            $link = "$fe_link/register/invite/$request->email/$code";
 
             // send link to email **********************
                     
