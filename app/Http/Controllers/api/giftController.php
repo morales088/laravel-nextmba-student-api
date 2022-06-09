@@ -143,11 +143,11 @@ class giftController extends Controller
             'hash' => 'required|string',
             'email' => 'required|string|email',
             'name' => 'required|string',
-            'phone' => 'string',
-            'location' => 'string',
-            'company' => 'string',
-            'position' => 'string',
-            'field' => 'string',
+            // 'phone' => 'string',
+            // 'location' => 'string',
+            // 'company' => 'string',
+            // 'position' => 'string',
+            // 'field' => 'string',
         ]);
 
         $decrypt = decrypt($request->hash);
