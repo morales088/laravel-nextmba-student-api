@@ -30,7 +30,7 @@ class studentController extends Controller
 		(CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status
         from modules m
         left join student_modules sm ON m.id = sm.moduleId
-        where sm.status <> 0 and m.status = 2 and m.id = $moduleId and sm.studentId = $userId"))->first();
+        where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
 
         $student_module->topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                 s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path
@@ -212,7 +212,7 @@ class studentController extends Controller
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
-                                where m.status <> 0 and sm.status <> 0 and c.status <> 0
+                                where m.status= 2 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId and c.id = $id group by c.id"))->first();
         }else{
             $courses = DB::SELECT("select c.*, sc.starting start_date, sc.expirationDate expiration_date,
@@ -221,7 +221,7 @@ class studentController extends Controller
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
                                 left join studentcourses sc ON sc.courseId = c.id and sm.studentId = sc.studentId
-                                where m.status <> 0 and sm.status <> 0 and c.status <> 0
+                                where m.status = 2 and sm.status <> 0 and c.status <> 0
                                 and sm.studentId = $userId group by c.id");
         }
 
