@@ -235,7 +235,7 @@ class studentController extends Controller
             //                     where m.status = 2 and sm.status <> 0 and c.status <> 0
             //                     and sm.studentId = $userId group by c.id");
 
-            $courses = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+            $courses = DB::SELECT("select c.*, sc.starting, sc.expirationDate,
                                             SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                             SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                             count(sm.id) total_st_modules,
@@ -244,7 +244,7 @@ class studentController extends Controller
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId
                                             left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId"))->first();
+                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId");
         }
 
         return response(["course" => $courses], 200);
