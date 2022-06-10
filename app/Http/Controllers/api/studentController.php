@@ -392,4 +392,12 @@ class studentController extends Controller
 
         return response(["billing" => $billing], 200);
     }
+    public function getPayment(Request $request, $id){
+
+        $payment = DB::SELECT("select *, concat(p.first_name, ' ', p.last_name) name
+                                from payments p where p.id = $id");
+
+        return response(["payment" => $payment], 200);
+
+    }
 }
