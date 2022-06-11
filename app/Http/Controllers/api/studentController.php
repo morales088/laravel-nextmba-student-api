@@ -425,31 +425,32 @@ class studentController extends Controller
     }
 
     
-    public function getStudentSettings(Request $request, $id){
+    public function getStudentSettings(Request $request){
+        $userId = auth('api')->user()->id;
         
-        $request->query->add(['id' => $id]);
+        // $request->query->add(['id' => $id]);
 
-        $request->validate([
-            'id' => 'required|numeric|min:1|exists:students,id',
-        ]);
+        // $request->validate([
+        //     'id' => 'required|numeric|min:1|exists:students,id',
+        // ]);
 
-        $settings = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $id"))->frst();
+        $settings = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->frst();
 
         
         return response(["settings" => $settings], 200);
 
     }
 
-    public function updateStudentSettings(Request $request, $id){
-        
-        
-        $request->query->add(['id' => $id]);
+    public function updateStudentSettings(Request $request){
+        $userId = auth('api')->user()->id;
+                
+        // $request->query->add(['id' => $id]);
 
         $request->validate([
-            'id' => 'required|numeric|min:1|exists:students,id',
+            'timezone' => 'required|string',
         ]);
 
-        $check = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $id"))->frst();
+        $check = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->frst();
         
         if($check){
 
