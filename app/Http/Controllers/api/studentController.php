@@ -181,15 +181,15 @@ class studentController extends Controller
         
         $userId = auth('api')->user()->id;
 
-        $upcoming_modules = DB::SELECT("select m.*, c.name course_name
+        $upcoming_modules = COLLECT(\DB::SELECT("select m.*, c.name course_name
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
                                         where m.status <> 0 and sm.status <> 0 and c.status <> 0
-                                        and sm.studentId = 1 and  m.broadcast_status = $userId and m.start_date > '".now()."'");
+                                        and sm.studentId = $userId and m.broadcast_status = 1 and m.start_date > '".now()."'"))->first();
                                         
-        foreach ($upcoming_modules as $key => $value) {
-            $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+        // foreach ($upcoming_modules as $key => $value) {
+            $upcoming_modules->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                     s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
@@ -198,7 +198,7 @@ class studentController extends Controller
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $value->id");
-        }
+        // }
 
         return response(["modules" => $upcoming_modules], 200);
     }
