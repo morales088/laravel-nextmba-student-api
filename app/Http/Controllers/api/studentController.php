@@ -434,7 +434,7 @@ class studentController extends Controller
         //     'id' => 'required|numeric|min:1|exists:students,id',
         // ]);
 
-        $settings = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->frst();
+        $settings = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->first();
 
         
         return response(["settings" => $settings], 200);
@@ -450,7 +450,7 @@ class studentController extends Controller
             'timezone' => 'required|string',
         ]);
 
-        $check = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->frst();
+        $check = COLLECT(\DB::SELECT("SELECT * FROM student_settings WHERE studentId = $userId"))->first();
         
         if($check){
 
