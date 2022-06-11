@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
+use App\Models\Studentsetting;
 use DB;
 
 
@@ -461,12 +462,17 @@ class studentController extends Controller
                                 'updated_at' => now(),
                             ]
                             );
+            return response(["student_setting" => $student_setting], 200);
 
         }else{
-            Studentsetting::create(
+
+            $student_setting = Studentsetting::create(
                         [
+                            'studentId' => $userId,
                             'timezone' => $request->timezone,
                         ]);
+
+            return response(["student_setting" => $student_setting], 200);
         }
     }
 }
