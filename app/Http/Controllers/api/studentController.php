@@ -43,6 +43,8 @@ class studentController extends Controller
 
         $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
 
+        $student_module->files = DB::SELECT("SELECT * FROM module_files where moduleId = $moduleId and status <> 0");
+
         // dd($request->all(), $student_module);
         return response(["student_module" => $student_module], 200);
     }
