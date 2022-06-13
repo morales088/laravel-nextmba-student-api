@@ -576,7 +576,7 @@ class studentController extends Controller
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $value->id");
 
-                $latest_module->from_course = $value->name;
+                $latest_module->course_name = $value->name;
                 $latest_module->topics = $topics;
 
                 array_push($modules, $latest_module);
