@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use App\Mail\AccountCredentialEmail;
+use App\Mail\ForgotPassword;
+use App\Mail\AccountUpdate;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
@@ -490,8 +491,55 @@ class studentController extends Controller
         $request->validate([
             'email' => 'required|exists:students,email',
         ]);
-        
-        dd($request->all());
 
+        // $expiration_date = now()->addMinutes(30);
+        // dd($expiration_date);
+        $student = COLLECT(\DB::SELECT("SELECT * from students where email = '$request->email' and status <> 0"))->first();
+
+        $info = ['id' => $student->id];
+        $encoded = json_encode($info);
+        $code = encrypt($encoded);
+
+        $link = env('APP_URL').'/api/student/confirm_password/?info='.$code;
+        
+        // dd($request->all(), $code, $info, $link);
+        $data = [
+            'hash' => $link,
+        ];
+        Mail::to($request->email)->send(new ForgotPassword($data));
+
+        
+        return response(["message" => "success"], 200);
+    }
+
+    public function confirmPassword(Request $request){
+
+        $decrypt = decrypt($request->info);
+        $data = json_decode($decrypt);
+
+        $password = Student::generate_password();
+        $hashPasword = Hash::make($password);
+        
+        $student = Student::find($data->id);
+        
+        // dd($student);
+
+        $student->update(
+                        [ 
+                            'password' => $hashPasword,
+                            // 'updated_at' => now()
+                        ]
+                    );
+
+        $user = [
+            'email' => $student->email,
+            'password' => $password
+        ];
+
+        Mail::to($student->email)->send(new AccountUpdate($user));
+
+        return redirect()->to(env('APP_URL'));
+
+        
     }
 }

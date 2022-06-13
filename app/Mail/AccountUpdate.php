@@ -7,19 +7,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ForgotPassword extends Mailable
+class AccountUpdate extends Mailable
 {
     use Queueable, SerializesModels;
-    public $data;
+    public $user;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($data)
+    public function __construct($user)
     {
-        $this->data = $data;
+        $this->user = $user;
     }
 
     /**
@@ -29,9 +29,9 @@ class ForgotPassword extends Mailable
      */
     public function build()
     {
-        // dd($this->data);
-        return $this->subject('NEXT University Account')->view('email.forgot-account')->with([
-            'hash' => $this->data['hash'],
+        return $this->subject('NEXT University Account')->view('email.update-account')->with([
+            'email' => $this->user['email'],
+            'password' => $this->user['password'],
         ]);
     }
 }
