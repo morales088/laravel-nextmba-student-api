@@ -196,8 +196,9 @@ class studentController extends Controller
                                         left join courses c on m.courseId = c.id
                                         where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and m.start_date > '".now()."'"))->first();
-                                        
+                //  dd($upcoming_modules);                       
         // foreach ($upcoming_modules as $key => $value) {
+            if(!empty($upcoming_modules)){
             $upcoming_modules->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                     s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
                                                     sr.role,
@@ -207,6 +208,7 @@ class studentController extends Controller
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $upcoming_modules->id");
+            }
         // }
 
         return response(["modules" => $upcoming_modules], 200);
