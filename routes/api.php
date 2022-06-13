@@ -50,6 +50,9 @@ Route::prefix("/student")->group( function (){
     
     Route::middleware("auth:api")->get("/settings", "api\studentController@getStudentSettings");
     Route::middleware("auth:api")->post("/settings", "api\studentController@updateStudentSettings");
+
+    
+    Route::post("/forgot_password", "api\studentController@forgotPasword");
     
 
 });

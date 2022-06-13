@@ -482,4 +482,14 @@ class studentController extends Controller
             return response(["student_setting" => $student_setting], 200);
         }
     }
+
+    public function forgotPasword(Request $request){
+        
+        $request->validate([
+            'email' => 'required|exists:students,email',
+        ]);
+
+        dd($request->all());
+
+    }
 }
