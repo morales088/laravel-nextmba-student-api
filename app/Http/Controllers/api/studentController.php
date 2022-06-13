@@ -562,9 +562,13 @@ class studentController extends Controller
                                 from modules m
                                 where m.courseId = $value->id and m.status = 2 and m.broadcast_status in (1,2)
                                 order by m.start_date asc"))->first();
-            $latest_module->from_course = $value->name;
+                                
+            if(!empty($latest_module)){
 
-            array_push($modules, $latest_module);
+                $latest_module->from_course = $value->name;
+
+                array_push($modules, $latest_module);
+            }
 
         }
 
