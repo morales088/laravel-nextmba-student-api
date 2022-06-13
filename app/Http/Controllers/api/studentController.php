@@ -544,4 +544,30 @@ class studentController extends Controller
 
         
     }
+
+    public function modulePerCourse(Request $request){
+        
+        $userId = auth('api')->user()->id;
+
+        $courses = DB::SELECT("select c.*
+                                from courses c
+                                left join studentcourses sc ON sc.courseId = c.id
+                                where sc.studentId = $userId and c.status <> 0 and sc.status <> 0");
+                    
+        $modules = [];
+
+        foreach ($courses as $key => $value) {
+
+            $latest_module = COLLECT(\DB::SELECT("select *
+                                from modules m
+                                where m.courseId = $value->id and m.status = 2 and m.broadcast_status in (1,2)
+                                order by m.start_date asc"))->first();
+            $latest_module->from_course = $value->name;
+
+            array_push($modules, $latest_module);
+
+        }
+
+        return response(["modules" => $modules], 200);
+    }
 }
