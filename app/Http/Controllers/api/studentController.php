@@ -562,10 +562,22 @@ class studentController extends Controller
                                 from modules m
                                 where m.courseId = $value->id and m.status = 2 and m.broadcast_status in (1,2)
                                 order by m.start_date asc"))->first();
-                                
+
             if(!empty($latest_module)){
 
+
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                                                    s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
+                                                    sr.role,
+                                                    (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                                                    from topics t
+                                                    left join speaker_roles sr ON t.id = sr.topicId
+                                                    left join speakers s on t.speakerId = s.id
+                                                    where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                                                    and t.moduleId = $value->id");
+
                 $latest_module->from_course = $value->name;
+                $latest_module->topics = $topics;
 
                 array_push($modules, $latest_module);
             }
