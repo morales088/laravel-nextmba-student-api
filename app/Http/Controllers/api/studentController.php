@@ -538,7 +538,7 @@ class studentController extends Controller
 
         Mail::to($student->email)->send(new AccountUpdate($user));
 
-        return redirect()->to(env('APP_URL'));
+        return redirect()->to(env('FRONTEND_LINK'));
 
         
     }
