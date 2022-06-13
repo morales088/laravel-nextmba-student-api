@@ -122,9 +122,9 @@ class studentController extends Controller
                                                 -- ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
                                                 IF(SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) > 11, 100.00, ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / 12) * 100 ), 0 )) score_percentage
                                                 from courses c
+                                                left join studentcourses sc ON c.id = sc.courseId
                                                 left join modules m ON m.courseId = c.id
-                                                left join student_modules sm ON m.id = sm.moduleId
-                                                left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+                                                left join student_modules sm ON m.id = sm.moduleId and sc.studentId = sm.studentId
                                                 where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
                                                 // dd($check);
                 if($check){
