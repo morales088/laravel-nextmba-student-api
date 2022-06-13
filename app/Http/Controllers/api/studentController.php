@@ -170,7 +170,7 @@ class studentController extends Controller
         from student_modules sm
         left join modules m ON m.id = sm.moduleId
         left join courses c on m.courseId = c.id
-        where m.broadcast_status = 2 and m. status <> 0 and sm.status <> 0 and c.status <> 0 and
+        where m.broadcast_status = 2 and m.status = 2 and m.status <> 0 and sm.status <> 0 and c.status <> 0 and
         sm.studentId = $userId");
 
         foreach ($live_modules as $key => $value) {
@@ -195,7 +195,7 @@ class studentController extends Controller
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
                                         where m.status <> 0 and sm.status <> 0 and c.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status = 1 and m.start_date > '".now()."'"))->first();
+                                        and sm.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and m.start_date > '".now()."'"))->first();
                                         
         // foreach ($upcoming_modules as $key => $value) {
             $upcoming_modules->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
@@ -288,7 +288,7 @@ class studentController extends Controller
                                                 (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
                                                 from student_modules sm
                                                 left join modules m ON sm.moduleId = m.id
-                                                where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id");
+                                                where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2");
         }
         // dd($courses);
         return response(["courses" => $courses], 200);
