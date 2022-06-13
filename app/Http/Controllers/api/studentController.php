@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use App\Mail\AccountCredentialEmail;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
 use App\Models\Studentsetting;
+use Mail;
 use DB;
 
 
@@ -488,7 +490,7 @@ class studentController extends Controller
         $request->validate([
             'email' => 'required|exists:students,email',
         ]);
-
+        
         dd($request->all());
 
     }
