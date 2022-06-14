@@ -37,7 +37,7 @@ class studentController extends Controller
         where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
 
         $student_module->topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
-                                                s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path
+                                                s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
                                                 from student_modules sm
                                                 left join topics t ON sm.moduleId = t.moduleId
                                                 left join speakers s ON s.id = t.speakerId
@@ -175,7 +175,7 @@ class studentController extends Controller
 
         foreach ($live_modules as $key => $value) {
         $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
-                            s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
+                            s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                             (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                             from topics t
                             left join speaker_roles sr ON t.id = sr.topicId
@@ -200,7 +200,7 @@ class studentController extends Controller
         // foreach ($upcoming_modules as $key => $value) {
             if(!empty($upcoming_modules)){
             $upcoming_modules->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
-                                                    s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
+                                                    s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                                                     from topics t
@@ -567,7 +567,7 @@ class studentController extends Controller
 
 
                 $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
-                                                    s.id speaker_id, s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path,
+                                                    s.id speaker_id, s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                                                     from topics t
