@@ -47,7 +47,7 @@ class Module extends Model
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
                                         where m. status <> 0 and sm.status <> 0 and c.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and c.id = $course_id and m.start_date > '".now()."'");
+                                        and sm.studentId = $userId and m.broadcast_status in (1,2) and m.status = 2 and c.id = $course_id and m.start_date > '".now()."'");
 
             if($modules){
                 foreach ($modules as $key => $value) {
