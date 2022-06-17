@@ -591,11 +591,11 @@ class studentController extends Controller
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $value->id");
-                foreach ($topics as $key => $value) {
-                    $value->speaker_description = urldecode($value->speaker_description);
+                foreach ($topics as $key1 => $value1) {
+                    $value1->speaker_description = urldecode($value1->speaker_description);
                 }
 
-                // $latest_module->course_name = $value->name;
+                $latest_module->course_name = $value->name;
                 $latest_module->topics = $topics;
 
                 array_push($modules, $latest_module);
