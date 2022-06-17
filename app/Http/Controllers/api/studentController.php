@@ -35,6 +35,8 @@ class studentController extends Controller
         from modules m
         left join student_modules sm ON m.id = sm.moduleId
         where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
+        
+        $student_module->description = urldecode($student_module->description);
 
         $topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                 s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
@@ -45,6 +47,7 @@ class studentController extends Controller
                                                 and sm.moduleId = $moduleId and sm.studentId = $userId");
         
         foreach ($topics as $key => $value) {
+            $value->topic_description = urldecode($value->topic_description);
             $value->speaker_description = urldecode($value->speaker_description);
         }
 
@@ -86,7 +89,10 @@ class studentController extends Controller
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                     where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage < 100");
-                                    
+
+            foreach ($courses as $key => $value) {
+                $value->description = urldecode($value->description);
+            }  
 
         }elseif($request->course_type == 'completed'){
             // complete
@@ -104,6 +110,11 @@ class studentController extends Controller
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                     where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage = 100");
+                                    
+            foreach ($courses as $key => $value) {
+                $value->description = urldecode($value->description);
+            }  
+
         }else{
             // all
             // $courses = DB::SELECT("select c.*,
@@ -121,6 +132,9 @@ class studentController extends Controller
             $courses = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
             
             foreach ($courses as $key => $value) {
+
+                $value->description = urldecode($value->description);
+
                 $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
                                                 SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                                 SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
@@ -180,7 +194,10 @@ class studentController extends Controller
         sm.studentId = $userId");
 
         foreach ($live_modules as $key => $value) {
-        $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+
+            $value->description = urldecode($value->description);
+
+            $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                             s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                             (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                             from topics t
@@ -190,6 +207,7 @@ class studentController extends Controller
                             and t.moduleId = $value->id");
 
             foreach ($topics as $key1 => $value1) {
+                $value1->topic_description = urldecode($value1->topic_description);
                 $value1->speaker_description = urldecode($value1->speaker_description);
             }
             $value->topics = $topics;
@@ -208,6 +226,8 @@ class studentController extends Controller
                                         left join courses c on m.courseId = c.id
                                         where m.status <> 0 and sm.status <> 0 and c.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and m.start_date > '".now()."'"))->first();
+                                        
+        $upcoming_modules->description = urldecode($upcoming_modules->description);
                 //  dd($upcoming_modules);                       
         // foreach ($upcoming_modules as $key => $value) {
             if(!empty($upcoming_modules)){
@@ -221,6 +241,7 @@ class studentController extends Controller
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $upcoming_modules->id");
                 foreach ($topics as $key => $value) {
+                    $value->topic_description = urldecode($value->topic_description);
                     $value->speaker_description = urldecode($value->speaker_description);
                 }
                 $upcoming_modules->topics = $topics;
@@ -253,6 +274,8 @@ class studentController extends Controller
                                             left join student_modules sm ON m.id = sm.moduleId
                                             left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                             where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $id"))->first();
+        $courses->description = urldecode($courses->description);
+            
         }else{
             // $courses = DB::SELECT("select c.*, sc.starting start_date, sc.expirationDate expiration_date,
             //                     ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
@@ -274,6 +297,10 @@ class studentController extends Controller
                                             left join student_modules sm ON m.id = sm.moduleId
                                             left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                             where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId");
+            foreach ($courses as $key => $value) {
+                $value->description = urldecode($value->description);
+            }
+
         }
 
         return response(["course" => $courses], 200);
@@ -302,11 +329,19 @@ class studentController extends Controller
                                 and sm.studentId = $userId $courseQuery group by c.id");
 
         foreach ($courses as $key => $value) {
-            $value->past_module = DB::SELECT("select m.*,
+            $value->description = urldecode($value->description);
+
+            $past_module = DB::SELECT("select m.*,
                                                 (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
                                                 from student_modules sm
                                                 left join modules m ON sm.moduleId = m.id
                                                 where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2 and m.broadcast_status in (3,4)");
+
+            foreach ($past_module as $key1 => $value1) {
+                $value1->description = urldecode($value1->description);
+            }
+
+            $value->past_module = $past_module;
         }
         // dd($courses);
         return response(["courses" => $courses], 200);
@@ -573,6 +608,8 @@ class studentController extends Controller
         $modules = [];
 
         foreach ($courses as $key => $value) {
+            
+            $value->description = urldecode($value->description);
 
             $latest_module = COLLECT(\DB::SELECT("select *
                                 from modules m
@@ -580,7 +617,8 @@ class studentController extends Controller
                                 order by m.start_date asc"))->first();
 
             if(!empty($latest_module)){
-
+                
+                $latest_module->description = urldecode($latest_module->description);
 
                 $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                     s.id speaker_id, s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
@@ -592,6 +630,7 @@ class studentController extends Controller
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $value->id");
                 foreach ($topics as $key1 => $value1) {
+                    $value1->topic_description = urldecode($value1->topic_description);
                     $value1->speaker_description = urldecode($value1->speaker_description);
                 }
 
@@ -625,6 +664,10 @@ class studentController extends Controller
                                     where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage < 100");
 
+        foreach ($active as $key => $value) {                
+            $value->description = urldecode($value->description);
+        }        
+
         $complete = DB::SELECT("select *
                                     from
                                     (select c.*, sc.starting, sc.expirationDate,
@@ -639,10 +682,16 @@ class studentController extends Controller
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                     where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId
                                     group by c.id) c where c.score_percentage = 100");
+        
+        foreach ($complete as $key => $complete) {                
+            $value->description = urldecode($value->description);
+        } 
+
 
         $all = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
             
         foreach ($all as $key => $value) {
+            $value->description = urldecode($value->description);
             $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
                                             SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                             SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
