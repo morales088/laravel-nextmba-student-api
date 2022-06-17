@@ -595,7 +595,7 @@ class studentController extends Controller
                     $value->speaker_description = urldecode($value->speaker_description);
                 }
 
-                $latest_module->course_name = $value->name;
+                // $latest_module->course_name = $value->name;
                 $latest_module->topics = $topics;
 
                 array_push($modules, $latest_module);
