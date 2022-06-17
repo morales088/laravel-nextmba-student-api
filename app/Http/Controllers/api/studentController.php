@@ -36,13 +36,19 @@ class studentController extends Controller
         left join student_modules sm ON m.id = sm.moduleId
         where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
 
-        $student_module->topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+        $topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                 s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
                                                 from student_modules sm
                                                 left join topics t ON sm.moduleId = t.moduleId
                                                 left join speakers s ON s.id = t.speakerId
                                                 where sm.status <> 0 and t.status <> 0 and s.status <> 0
                                                 and sm.moduleId = $moduleId and sm.studentId = $userId");
+        
+        foreach ($topics as $key => $value) {
+            $value->speaker_description = urldecode($value->speaker_description);
+        }
+
+        $student_module->topics = $topics;
 
         $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
 
@@ -174,7 +180,7 @@ class studentController extends Controller
         sm.studentId = $userId");
 
         foreach ($live_modules as $key => $value) {
-        $value->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+        $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                             s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                             (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                             from topics t
@@ -182,7 +188,13 @@ class studentController extends Controller
                             left join speakers s on t.speakerId = s.id
                             where t.status <> 0 and sr.status <> 0 and s.status <> 0
                             and t.moduleId = $value->id");
+
+            foreach ($topics as $key1 => $value1) {
+                $value1->speaker_description = urldecode($value1->speaker_description);
+            }
+            $value->topics = $topics;
         }
+
         return response(["modules" => $live_modules], 200);
     }
 
@@ -199,7 +211,7 @@ class studentController extends Controller
                 //  dd($upcoming_modules);                       
         // foreach ($upcoming_modules as $key => $value) {
             if(!empty($upcoming_modules)){
-            $upcoming_modules->topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
                                                     s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
@@ -208,6 +220,10 @@ class studentController extends Controller
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $upcoming_modules->id");
+                foreach ($topics as $key => $value) {
+                    $value->speaker_description = urldecode($value->speaker_description);
+                }
+                $upcoming_modules->topics = $topics;
             }
         // }
 
@@ -575,6 +591,9 @@ class studentController extends Controller
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
                                                     and t.moduleId = $value->id");
+                foreach ($topics as $key => $value) {
+                    $value->speaker_description = urldecode($value->speaker_description);
+                }
 
                 $latest_module->course_name = $value->name;
                 $latest_module->topics = $topics;
