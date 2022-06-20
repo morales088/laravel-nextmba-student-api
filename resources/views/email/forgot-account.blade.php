@@ -169,7 +169,8 @@ table, td { color: #000000; } a { color: #0000ee; text-decoration: underline; }
       <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;" align="left">
         
   <div style="line-height: 140%; text-align: left; word-wrap: break-word;">
-    <p style="font-size: 14px; line-height: 140%;">Confirm reset password.</p>
+    <p style="font-size: 14px; line-height: 140%;">We received a request for password reset.</p>
+    <p style="font-size: 14px; line-height: 140%;">Please click confirm below if it was you.</p>
   </div>
 
       </td>

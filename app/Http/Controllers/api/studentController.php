@@ -613,7 +613,7 @@ class studentController extends Controller
 
             $latest_module = COLLECT(\DB::SELECT("select *
                                 from modules m
-                                where m.courseId = $value->id and m.status = 2 and m.broadcast_status in (1,2)
+                                where m.courseId = $value->id and m.start_date > '".now()."' and m.status = 2 and m.broadcast_status in (1,2)
                                 order by m.start_date asc"))->first();
 
             if(!empty($latest_module)){
