@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use App\Mail\ForgotPassword;
 use App\Mail\AccountUpdate;
+use App\Mail\ChangeEmail;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
@@ -379,6 +380,18 @@ class studentController extends Controller
         // dd($request->all(), $request->has('LI'));
 
         $student = Student::find($userId);
+        
+        if($request->email != $student->email){
+            
+            $previous_email = $student->email;
+            
+            $user = [
+                'email' => $request->email,
+            ];
+
+            Mail::to($student->email)->send(new ChangeEmail($user));
+
+        }
         
         $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field') +
                         [ 'updated_at' => now()]
