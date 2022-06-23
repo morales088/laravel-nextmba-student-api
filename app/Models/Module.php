@@ -17,7 +17,7 @@ class Module extends Model
         
         if($modules_type == 'live'){
 
-            $modules = DB::SELECT("select m.*, c.name course_name
+            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
@@ -52,7 +52,7 @@ class Module extends Model
 
         }elseif($modules_type == 'upcoming'){
 
-            $modules = DB::SELECT("select m.*, c.name course_name
+            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
@@ -83,12 +83,12 @@ class Module extends Model
             }
             
         }else{
-            $modules = DB::SELECT("select m.*, c.name course_name
+            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
                                         where m.status = 2 and sm.status <> 0 and c.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id and m.end_date < '".now()."'");
+                                        and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id");
             
             if($modules){
                 foreach ($modules as $key => $value) {

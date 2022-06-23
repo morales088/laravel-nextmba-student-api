@@ -78,7 +78,7 @@ class studentController extends Controller
             // active
             $courses = DB::SELECT("select *                                
                                     from
-                                    (select c.*, sc.starting, sc.expirationDate,
+                                    (select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                     SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                     count(sm.id) total_st_modules,
@@ -99,7 +99,7 @@ class studentController extends Controller
             // complete
             $courses = DB::SELECT("select *
                                     from
-                                    (select c.*, sc.starting, sc.expirationDate,
+                                    (select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                     SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                     count(sm.id) total_st_modules,
@@ -130,13 +130,13 @@ class studentController extends Controller
             //     where c.status <> 0 or m.status <> 0 or sm.status <> 0
             //     group by c.id");
 
-            $courses = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
+            $courses = DB::SELECT("SELECT *, c.price course_price FROM courses c where c.status <> 0");
             
             foreach ($courses as $key => $value) {
 
                 $value->description = urldecode($value->description);
 
-                $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+                $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                                 SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                                 SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                                 count(sm.id) total_st_modules,
@@ -187,7 +187,7 @@ class studentController extends Controller
         
         $userId = auth('api')->user()->id;
 
-        $live_modules = DB::SELECT("select m.*, c.name course_name
+        $live_modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
         from student_modules sm
         left join modules m ON m.id = sm.moduleId
         left join courses c on m.courseId = c.id
@@ -221,7 +221,7 @@ class studentController extends Controller
         
         $userId = auth('api')->user()->id;
 
-        $upcoming_modules = COLLECT(\DB::SELECT("select m.*, c.name course_name
+        $upcoming_modules = COLLECT(\DB::SELECT("select m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
                                         left join courses c on m.courseId = c.id
@@ -264,7 +264,7 @@ class studentController extends Controller
             //                     where m.status= 2 and sm.status <> 0 and c.status <> 0
             //                     and sm.studentId = $userId and c.id = $id group by c.id"))->first();
 
-            $courses = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+            $courses = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                             SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                             SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                             count(sm.id) total_st_modules,
@@ -287,7 +287,7 @@ class studentController extends Controller
             //                     where m.status = 2 and sm.status <> 0 and c.status <> 0
             //                     and sm.studentId = $userId group by c.id");
 
-            $courses = DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+            $courses = DB::SELECT("select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                             SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                             SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                             count(sm.id) total_st_modules,
@@ -322,7 +322,7 @@ class studentController extends Controller
             $courseQuery = "and c.id = $course_id";
         }
 
-        $courses = DB::SELECT("select c.*
+        $courses = DB::SELECT("select c.*, c.price course_price
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
                                 left join courses c on m.courseId = c.id
@@ -613,7 +613,7 @@ class studentController extends Controller
         
         $userId = auth('api')->user()->id;
 
-        $courses = DB::SELECT("select c.*
+        $courses = DB::SELECT("select c.*, c.price course_price
                                 from courses c
                                 left join studentcourses sc ON sc.courseId = c.id
                                 where sc.studentId = $userId and c.status <> 0 and sc.status <> 0");
@@ -664,7 +664,7 @@ class studentController extends Controller
         
         $active = DB::SELECT("select *                                
                                     from
-                                    (select c.*, sc.starting, sc.expirationDate,
+                                    (select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                     SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                     count(sm.id) total_st_modules,
@@ -683,7 +683,7 @@ class studentController extends Controller
 
         $complete = DB::SELECT("select *
                                     from
-                                    (select c.*, sc.starting, sc.expirationDate,
+                                    (select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                     SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                     SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                     count(sm.id) total_st_modules,
@@ -701,11 +701,11 @@ class studentController extends Controller
         } 
 
 
-        $all = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
+        $all = DB::SELECT("SELECT *, c.price course_price FROM courses c where c.status <> 0");
             
         foreach ($all as $key => $value) {
             $value->description = urldecode($value->description);
-            $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate,
+            $check = COLLECT(\DB::SELECT("select c.*, sc.starting, sc.expirationDate, c.price course_price,
                                             SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
                                             SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
                                             count(sm.id) total_st_modules,
