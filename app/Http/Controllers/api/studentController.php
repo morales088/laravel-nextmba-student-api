@@ -641,7 +641,7 @@ class studentController extends Controller
                                                     left join speaker_roles sr ON t.id = sr.topicId
                                                     left join speakers s on t.speakerId = s.id
                                                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
-                                                    and t.moduleId = $value->id");
+                                                    and t.moduleId = $latest_module->id");
                 foreach ($topics as $key1 => $value1) {
                     $value1->topic_description = urldecode($value1->topic_description);
                     $value1->speaker_description = urldecode($value1->speaker_description);
@@ -715,7 +715,7 @@ class studentController extends Controller
                                             left join studentcourses sc ON c.id = sc.courseId
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id and sc.starting >= m.start_date"))->first();
+                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
                                             // dd($check);
             if($check){
                 $value->starting = $check->starting;
