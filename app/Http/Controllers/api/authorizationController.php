@@ -21,11 +21,16 @@ class authorizationController extends Controller
             return response(["message" => "Invalid login credentials"], 401);
         }
 
-
+        $user = Auth::user();
         $accessToken = Auth::user()->createToken('authToken')->accessToken;
+        
+        $student = Student::find($user->id);
+        $student->update(
+                        [ 'last_login' => now(), 'updated_at' => now()]
+                        );
 
         // dd($request->all(), $accessToken);
-        return response()->json(["student" => Auth::user(), "access_token" => $accessToken], 200);
+        return response()->json(["student" => $user, "access_token" => $accessToken], 200);
         
     }
 }

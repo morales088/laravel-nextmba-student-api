@@ -88,7 +88,7 @@ class studentController extends Controller
                                     left join modules m ON m.courseId = c.id
                                     left join student_modules sm ON m.id = sm.moduleId
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting >= m.start_date
+                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting <= m.start_date
                                     group by c.id) c where c.score_percentage < 100");
 
             foreach ($courses as $key => $value) {
@@ -109,7 +109,7 @@ class studentController extends Controller
                                     left join modules m ON m.courseId = c.id
                                     left join student_modules sm ON m.id = sm.moduleId
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting >= m.start_date
+                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting <= m.start_date
                                     group by c.id) c where c.score_percentage = 100");
                                     
             foreach ($courses as $key => $value) {
@@ -146,7 +146,7 @@ class studentController extends Controller
                                                 left join studentcourses sc ON c.id = sc.courseId
                                                 left join modules m ON m.courseId = c.id
                                                 left join student_modules sm ON m.id = sm.moduleId and sc.studentId = sm.studentId
-                                                where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id  and sc.starting >= m.start_date"))->first();
+                                                where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id  and sc.starting <= m.start_date"))->first();
                                                 // dd($check);
                 if($check){
                     $value->starting = $check->starting;
@@ -274,7 +274,7 @@ class studentController extends Controller
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId
                                             left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $id and sc.starting >= m.start_date"))->first();
+                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $id and sc.starting <= m.start_date"))->first();
         $courses->description = urldecode($courses->description);
             
         }else{
@@ -297,7 +297,7 @@ class studentController extends Controller
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId
                                             left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting >= m.start_date");
+                                            where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting <= m.start_date");
             foreach ($courses as $key => $value) {
                 $value->description = urldecode($value->description);
             }
@@ -693,7 +693,7 @@ class studentController extends Controller
                                     left join modules m ON m.courseId = c.id
                                     left join student_modules sm ON m.id = sm.moduleId
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
-                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting >= m.start_date
+                                    where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting <= m.start_date
                                     group by c.id) c where c.score_percentage = 100");
         
         foreach ($complete as $key => $complete) {                
@@ -715,7 +715,7 @@ class studentController extends Controller
                                             left join studentcourses sc ON c.id = sc.courseId
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id"))->first();
+                                            where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $value->id and sc.starting <= m.start_date"))->first();
                                             // dd($check);
             if($check){
                 $value->starting = $check->starting;
