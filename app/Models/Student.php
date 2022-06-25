@@ -46,7 +46,7 @@ class Student extends Authenticatable
     //     'email_verified_at' => 'datetime',
     // ];
     
-    public static function generate_password($length = 20){
+    public static function generate_password($length = 8){
         $chars =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       
         $str = '';
