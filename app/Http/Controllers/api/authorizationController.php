@@ -14,7 +14,7 @@ class authorizationController extends Controller
     public function personalAccessLogin (Request $request){
 
         $login = $request->validate([
-            'email' => 'required|string',
+            'email' => 'required|string|exists:students,email,status,1',
             'password' => 'required|string'
         ]);
         if(!Auth::attempt($login)){
