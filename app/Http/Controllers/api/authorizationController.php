@@ -24,10 +24,10 @@ class authorizationController extends Controller
         $user = Auth::user();
         $accessToken = Auth::user()->createToken('authToken')->accessToken;
         
-        $student = Student::find($user->id);
-        $student->update(
-                        [ 'last_login' => now(), 'updated_at' => now()]
-                        );
+        // $student = Student::find($user->id);
+        // $student->update(
+        //                 [ 'last_login' => now(), 'updated_at' => now()]
+        //                 );
 
         // dd($request->all(), $accessToken);
         return response()->json(["student" => $user, "access_token" => $accessToken], 200);
