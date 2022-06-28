@@ -336,7 +336,7 @@ class studentController extends Controller
                                                 (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
                                                 from student_modules sm
                                                 left join modules m ON sm.moduleId = m.id
-                                                where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2 and m.broadcast_status in (3,4)");
+                                                where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2 and m.broadcast_status in (3,4)  order by m.start_date asc");
 
             foreach ($past_module as $key1 => $value1) {
                 $value1->description = urldecode($value1->description);
