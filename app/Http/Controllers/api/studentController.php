@@ -418,6 +418,7 @@ class studentController extends Controller
                     'updated_at' => now()
                 ]
                 );
+                $student->update([ 'updated_at' => now()]);
             }else{
                 Link::create($request->only('icon') + 
                 [
@@ -425,6 +426,7 @@ class studentController extends Controller
                     'name' => $key,
                     'link' => $value
                 ]);
+                $student->update([ 'updated_at' => now()]);
             }
 
         }
