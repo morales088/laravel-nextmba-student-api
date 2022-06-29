@@ -380,8 +380,8 @@ class studentController extends Controller
         // dd($request->all(), $request->has('LI'));
 
         $student = Student::find($userId);
-        
-        if($request->email != $student->email){
+        // dd(!empty($request->email) && $request->email != $student->email, $student);
+        if(!empty($request->email) && $request->email != $student->email){
             
             $previous_email = $student->email;
             
