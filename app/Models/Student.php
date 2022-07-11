@@ -60,15 +60,22 @@ class Student extends Authenticatable
       return $str;
     }
 
-    public static function uploadProfile($imageRequest, $userId){
+    public static function uploadProfile($request, $userId){
       
-      // dd($imageRequest, $imageRequest['image']->extension(), $imageRequest['image']);
+      // dd($request, empty($request['profile_image']));
       
-      $imageName = time().'.'.$imageRequest['image']->extension();  
-      // dd($request->all(), $imageName);
-  
-      $path = Storage::disk('s3')->put('images/student_profile', $imageRequest['image']);
-      $path = Storage::disk('s3')->url($path);
+      if(!empty($request['profile_image'])){
+
+        $imageName = time().'.'.$request['profile_image']->extension();  
+        // dd($request->all(), $imageName);
+    
+        $path = Storage::disk('s3')->put('images/student_profile', $request['profile_image']);
+        $path = Storage::disk('s3')->url($path);
+
+      }else{
+        $path = $request['profile_link'];
+      }
+
 
       DB::table('students')
             ->where('id', $userId)

@@ -371,7 +371,7 @@ class studentController extends Controller
         $userId = auth('api')->user()->id;
 
         $request->validate([
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'profile_image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             // 'course_id' => 'numeric|min:1|exists:modules,id',
             // 'modules_type' => [
             //             'string',
@@ -380,7 +380,7 @@ class studentController extends Controller
         ]);
 
 
-        if($request->image){
+        if(!empty($request->profile_image) || !empty($request->profile_link)){
             $path = Student::uploadProfile($request->all(), $userId);
         }
 
