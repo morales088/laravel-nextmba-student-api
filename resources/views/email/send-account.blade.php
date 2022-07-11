@@ -114,7 +114,7 @@ table, td { color: #000000; } a { color: #0000ee; text-decoration: underline; }
       <td style="overflow-wrap:break-word;word-break:break-word;padding:20px 20px 10px;font-family:arial,helvetica,sans-serif;" align="left">
         
   <div style="line-height: 140%; text-align: left; word-wrap: break-word;">
-    <p style="font-size: 14px; line-height: 140%;">Your NEXT University account has been successfully created.</p>
+    <p style="font-size: 14px; line-height: 140%;">Your METAcademy account has been successfully created.</p>
   </div>
 
       </td>
@@ -186,7 +186,7 @@ table, td { color: #000000; } a { color: #0000ee; text-decoration: underline; }
         
 <div align="center">
   <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:arial,helvetica,sans-serif;"><tr><td style="font-family:arial,helvetica,sans-serif;" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://member.next.university/members/login" style="height:37px; v-text-anchor:middle; width:223px;" arcsize="11%" stroke="f" fillcolor="#f05811"><w:anchorlock/><center style="color:#FFFFFF;font-family:arial,helvetica,sans-serif;"><![endif]-->
-    <a href="{{ env('FRONTEND_LINK') }}/login" target="_blank" style="box-sizing: border-box;display: inline-block;font-family:arial,helvetica,sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #f05811; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
+    <a href="{{ env('FRONTEND_LINK') }}/login" target="_blank" style="box-sizing: border-box;display: inline-block;font-family:arial,helvetica,sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #08297B; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
       <span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">LOGIN TO YOUR ACCOUNT</span></span>
     </a>
   <!--[if mso]></center></v:roundrect></td></tr></table><![endif]-->
