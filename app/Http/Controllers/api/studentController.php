@@ -371,13 +371,18 @@ class studentController extends Controller
         $userId = auth('api')->user()->id;
 
         $request->validate([
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             // 'course_id' => 'numeric|min:1|exists:modules,id',
             // 'modules_type' => [
             //             'string',
             //             Rule::in(['live', 'upcoming', 'past']),
             //         ],
         ]);
-        // dd($request->all(), $request->has('LI'));
+
+
+        if($request->image){
+            $path = Student::uploadProfile($request->all(), $userId);
+        }
 
         $student = Student::find($userId);
         // dd(!empty($request->email) && $request->email != $student->email, $student);
