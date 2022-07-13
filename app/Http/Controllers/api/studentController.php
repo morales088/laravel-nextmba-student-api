@@ -173,7 +173,7 @@ class studentController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
         
-        $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, created_at, updated_at
+        $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, profile_picture, created_at, updated_at
                                 from students s where id = $request->id"))->first();
                                 
         $student->links = DB::SELECT("select * from links where studentId = $student->id");
@@ -371,13 +371,18 @@ class studentController extends Controller
         $userId = auth('api')->user()->id;
 
         $request->validate([
+            'profile_image' => 'image|mimes:jpeg,png,jpg|max:2048',
             // 'course_id' => 'numeric|min:1|exists:modules,id',
             // 'modules_type' => [
             //             'string',
             //             Rule::in(['live', 'upcoming', 'past']),
             //         ],
         ]);
-        // dd($request->all(), $request->has('LI'));
+
+
+        if(!empty($request->profile_image) || !empty($request->profile_link)){
+            $path = Student::uploadProfile($request->all(), $userId);
+        }
 
         $student = Student::find($userId);
         // dd(!empty($request->email) && $request->email != $student->email, $student);
