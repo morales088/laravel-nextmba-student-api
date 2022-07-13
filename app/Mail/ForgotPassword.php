@@ -30,7 +30,7 @@ class ForgotPassword extends Mailable
     public function build()
     {
         // dd($this->data);
-        return $this->subject('NEXT University Account')->view('email.forgot-account')->with([
+        return $this->subject('METAcademy Account')->view('email.forgot-account')->with([
             'hash' => $this->data['hash'],
         ]);
     }
