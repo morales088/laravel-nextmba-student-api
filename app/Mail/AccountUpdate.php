@@ -29,7 +29,7 @@ class AccountUpdate extends Mailable
      */
     public function build()
     {
-        return $this->subject('METAcademy Account')->view('email.update-account')->with([
+        return $this->subject('NEXT MBA Account')->view('email.update-account')->with([
             'email' => $this->user['email'],
             'password' => $this->user['password'],
         ]);

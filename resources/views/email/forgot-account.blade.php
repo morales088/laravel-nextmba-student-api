@@ -114,7 +114,7 @@ table, td { color: #000000; } a { color: #0000ee; text-decoration: underline; }
       <td style="overflow-wrap:break-word;word-break:break-word;padding:20px 20px 10px;font-family:arial,helvetica,sans-serif;" align="left">
         
   <div style="line-height: 140%; text-align: left; word-wrap: break-word;">
-    <p style="font-size: 14px; line-height: 140%;">METAcademy accounts.</p>
+    <p style="font-size: 14px; line-height: 140%;">NEXT MBA accounts.</p>
   </div>
 
       </td>
