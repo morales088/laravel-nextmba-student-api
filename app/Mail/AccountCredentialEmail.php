@@ -29,7 +29,7 @@ class AccountCredentialEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('METAcademy Account')->view('email.send-account')->with([
+        return $this->subject('NEXT MBA Account')->view('email.send-account')->with([
             'email' => $this->user['email'],
             'password' => $this->user['password'],
         ]);

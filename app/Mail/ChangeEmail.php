@@ -29,7 +29,7 @@ class ChangeEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('METAcademy Account')->view('email.change-email')->with([
+        return $this->subject('NEXT MBA Account')->view('email.change-email')->with([
             'email' => $this->user['email'],
             // 'password' => $this->user['password'],
         ]);
