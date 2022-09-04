@@ -63,8 +63,9 @@ class Student extends Authenticatable
     public static function uploadProfile($request, $userId){
       
       // dd($request, empty($request['profile_image']));
-      
-      if(!empty($request['profile_image'])){
+      if(!empty($request['delete_profile']) && $request['delete_profile'] == true){
+        $path = null;
+      }elseif(!empty($request['profile_image'])){
 
         $imageName = time().'.'.$request['profile_image']->extension();  
         // dd($request->all(), $imageName);

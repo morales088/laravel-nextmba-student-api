@@ -380,9 +380,8 @@ class studentController extends Controller
             //             Rule::in(['live', 'upcoming', 'past']),
             //         ],
         ]);
-
-
-        if(!empty($request->profile_image) || !empty($request->profile_link)){
+        
+        if( !empty($request->profile_image) || !empty($request->profile_link) || $request->delete_profile == true){
             $path = Student::uploadProfile($request->all(), $userId);
         }
 
