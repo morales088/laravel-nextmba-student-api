@@ -39,13 +39,15 @@ class studentController extends Controller
         
         $student_module->description = urldecode($student_module->description);
 
-        $topics = DB::SELECT("select t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
-                                                s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
-                                                from student_modules sm
-                                                left join topics t ON sm.moduleId = t.moduleId
-                                                left join speakers s ON s.id = t.speakerId
-                                                where sm.status <> 0 and t.status <> 0 and s.status <> 0
-                                                and sm.moduleId = $moduleId and sm.studentId = $userId");
+        $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                                s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
+                                from student_modules sm
+                                left join modules m ON m.id = sm.moduleId
+                                left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
+                                left join topics t ON sm.moduleId = t.moduleId
+                                left join speakers s ON s.id = t.speakerId
+                                where sm.status <> 0 and t.status <> 0 and s.status <> 0 and sc.status <> 0
+                                and sm.moduleId = $moduleId and sm.studentId = $userId");
         
         foreach ($topics as $key => $value) {
             $value->topic_description = urldecode($value->topic_description);

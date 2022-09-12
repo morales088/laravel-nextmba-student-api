@@ -22,7 +22,7 @@ class Module extends Model
                                         left join modules m ON m.id = sm.moduleId
                                         left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
-                                        where m.broadcast_status = 2 and m.status = 2 and sm.status <> 0 and c.status <> 0 and
+                                        where m.broadcast_status = 2 and m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0 and 
                                         sm.studentId = $userId and c.id = $course_id");
                                         
             
@@ -58,7 +58,7 @@ class Module extends Model
                                         left join modules m ON m.id = sm.moduleId
                                         left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
-                                        where m. status <> 0 and sm.status <> 0 and c.status <> 0
+                                        where m. status <> 0 and sm.status <> 0 and c.status <> 0 and sc.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status in (1,2) and m.status = 2 and c.id = $course_id and m.start_date > '".now()."' order by m.start_date asc");
 
             if($modules){
@@ -90,7 +90,7 @@ class Module extends Model
                                         left join modules m ON m.id = sm.moduleId
                                         left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
-                                        where m.status = 2 and sm.status <> 0 and c.status <> 0
+                                        where m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id order by m.start_date asc");
             
             if($modules){
