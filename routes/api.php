@@ -53,6 +53,8 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/settings", "api\studentController@getStudentSettings");
     Route::middleware("auth:api")->post("/settings", "api\studentController@updateStudentSettings");
 
+    Route::middleware("auth:api")->post("/issue/email", "api\studentController@emailIssue");
+
     
     Route::post("/forgot_password", "api\studentController@forgotPasword");
     Route::get("/confirm_password", "api\studentController@confirmPassword");

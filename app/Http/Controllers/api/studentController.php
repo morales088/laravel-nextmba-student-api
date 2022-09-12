@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 use App\Mail\ForgotPassword;
 use App\Mail\AccountUpdate;
 use App\Mail\ChangeEmail;
+use App\Mail\Issues;
 use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
@@ -740,5 +741,31 @@ class studentController extends Controller
         
         return response(["all" => $all, "active" => $active, "complete" => $complete], 200);
         
+    }
+
+    public function emailIssue(Request $request){
+        
+        $concern_recipient = env('concern_recipient');
+
+        $userId = auth('api')->user()->id;
+        $userEmail = auth('api')->user()->email;
+        $userName = auth('api')->user()->name;
+
+        $request->validate([
+            'messages' => 'required|string',
+        ]);
+        
+        // send concern message to email
+        $user = [
+            'email' => $userEmail,
+            'name' => $userName,
+            'messages' => $request->messages,
+            // 'date' => \DateTime::createFromFormat('Y-m-d H:i:s', now()),
+            
+        ];
+        // dd($user, $concern_recipient);
+        Mail::to($concern_recipient)->send(new Issues($user));
+        
+        return response(["message" => "Concern successfully sent."], 200);
     }
 }
