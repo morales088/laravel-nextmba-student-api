@@ -17,9 +17,10 @@ class Module extends Model
         
         if($modules_type == 'live'){
 
-            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
+            $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
+                                        left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
                                         where m.broadcast_status = 2 and m.status = 2 and sm.status <> 0 and c.status <> 0 and
                                         sm.studentId = $userId and c.id = $course_id");
@@ -52,9 +53,10 @@ class Module extends Model
 
         }elseif($modules_type == 'upcoming'){
 
-            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
+            $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
+                                        left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
                                         where m. status <> 0 and sm.status <> 0 and c.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status in (1,2) and m.status = 2 and c.id = $course_id and m.start_date > '".now()."' order by m.start_date asc");
@@ -83,9 +85,10 @@ class Module extends Model
             }
             
         }else{
-            $modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
+            $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from student_modules sm
                                         left join modules m ON m.id = sm.moduleId
+                                        left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
                                         where m.status = 2 and sm.status <> 0 and c.status <> 0
                                         and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id order by m.start_date asc");
