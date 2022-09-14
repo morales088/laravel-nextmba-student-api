@@ -573,11 +573,21 @@ class studentController extends Controller
         // dd($expiration_date);
         $student = COLLECT(\DB::SELECT("SELECT * from students where email = '$request->email' and status <> 0"))->first();
 
-        $info = ['id' => $student->id];
-        $encoded = json_encode($info);
-        $code = encrypt($encoded);
+        // $info = ['id' => $student->id];
+        // $encoded = json_encode($info);
+        // $code = encrypt($encoded);
 
-        $link = env('APP_URL').'/api/student/confirm_password/?info='.$code;
+        
+        $random = md5(uniqid(rand(), true));
+        $updatStudent = Student::find($student->id);
+        $updatStudent->update(
+                            [ 
+                                'forgot_password_code' => $random,
+                                'updated_at' => now()
+                            ]
+                            );
+                            
+        $link = env('APP_URL').'/api/student/confirm_password/?info='.$random;
         
         // dd($request->all(), $code, $info, $link);
         $data = [
@@ -591,29 +601,35 @@ class studentController extends Controller
 
     public function confirmPassword(Request $request){
 
-        $decrypt = decrypt($request->info);
-        $data = json_decode($decrypt);
-
+        // $decrypt = decrypt($request->info);
+        // $data = json_decode($decrypt);
+        
         $password = Student::generate_password();
         $hashPasword = Hash::make($password);
+
+        $student = COLLECT(\DB::SELECT("SELECT * from students where forgot_password_code = '$request->info' and status <> 0"))->first();
         
-        $student = Student::find($data->id);
+        if($student != null){
+
+            $student = Student::find($student->id);
         
-        // dd($student);
-
-        $student->update(
-                        [ 
-                            'password' => $hashPasword,
-                            // 'updated_at' => now()
-                        ]
-                    );
-
-        $user = [
-            'email' => $student->email,
-            'password' => $password
-        ];
-
-        Mail::to($student->email)->send(new AccountUpdate($user));
+            // dd($student);
+    
+            $student->update(
+                            [ 
+                                'forgot_password_code' => null,
+                                'password' => $hashPasword,
+                                // 'updated_at' => now()
+                            ]
+                        );
+    
+            $user = [
+                'email' => $student->email,
+                'password' => $password
+            ];
+    
+            Mail::to($student->email)->send(new AccountUpdate($user));
+        }
 
         return redirect()->to(env('FRONTEND_LINK'));
 
