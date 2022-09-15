@@ -29,7 +29,7 @@ class Issues extends Mailable
      */
     public function build()
     {
-        return $this->subject('NEXT MBA Account concerns')->view('email.issues')->with([
+        return $this->subject('NEXT MBA Account concerns')->replyTo($this->data['email'], $this->data['name'])->view('email.issues')->with([
             'email' => $this->data['email'],
             'name' => $this->data['name'],
             'messages' => $this->data['messages'],
