@@ -25,3 +25,4 @@ pipelines:
                 SERVER: $SERVER
                 REMOTE_PATH: $REMOTE_PATH
                 LOCAL_PATH: '$(pwd)'
+                DELETE_FLAG: 'false'
