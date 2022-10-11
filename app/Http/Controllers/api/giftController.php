@@ -18,12 +18,14 @@ class giftController extends Controller
 
     public function getGift(Request $request){
         $userId = auth('api')->user()->id;
-
-        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id
-                                from payments p
-                                left join payment_items pi ON p.id = pi.payment_id
-                                left join courses c ON c.id = pi.product_id
-                                where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
+        $date = env('GIFTABLE_DATE');
+        
+        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, sc.quantity as unconsumed_course, IF(p.created_at < '$date', true, false) giftable
+                            from payments p
+                            left join payment_items pi ON p.id = pi.payment_id
+                            left join courses c ON c.id = pi.product_id
+                            left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
+                            where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
 
         foreach ($courses as $key => $value) {
 
@@ -41,8 +43,9 @@ class giftController extends Controller
             $value->users = $owner;
             
         }
+        
 
-        return response(["courses" => $courses], 200);
+        return response(["courses" => $courses, "now" => $now], 200);
     }
 
     public function sendGift(Request $request){
@@ -188,5 +191,28 @@ class giftController extends Controller
         Mail::to($request->email)->send(new AccountCredentialEmail($user));
 
         return response(["message" => "success", "student" => $student], 200);
+    }
+
+    public function sendGift2(Request $request){
+        $userId = auth('api')->user()->id;
+        $fe_link = env('FRONTEND_LINK');
+
+        $request->validate([
+            'course_id' => 'required|numeric|min:1|exists:courses,id',
+            'payment_id' => 'required|numeric|min:1|exists:payments,id',
+            'email' => 'required|string|email',
+        ]);
+
+        $check_available_qty = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
+        $check_recipient_course = DB::SELECT("select *
+                    from students s
+                    left join studentcourses sc ON s.id = sc.studentId
+                    where s.status <> 0 and sc.status <> 0 and s.email = '$request->email' and sc.courseId = $request->course_id");
+
+        if($check_qty->quantity < 0 || !empty($check_recipient_course)){
+            return response()->json(["message" => "zero courses available / recipient already has this course"], 422);
+        }
+
+
     }
 }
