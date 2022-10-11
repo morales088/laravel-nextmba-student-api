@@ -45,7 +45,7 @@ class giftController extends Controller
         }
         
 
-        return response(["courses" => $courses, "now" => $now], 200);
+        return response(["courses" => $courses], 200);
     }
 
     public function sendGift(Request $request){
