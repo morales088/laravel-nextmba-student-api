@@ -30,18 +30,23 @@ class GiftEmail extends Mailable
     public function build()
     {
         // dd($this->user);
-        if(isset($this->user['link'])){
-            return $this->subject('NEXT University gift')->view('email.register-gift')->with([
-                'email' => $this->user['email_sender'],
-                'course' => $this->user['course'],
-                'link' => $this->user['link'],
-            ]);
-        }else{
-            return $this->subject('NEXT University gift')->view('email.notify-gift')->with([
-                'email' => $this->user['email_sender'],
-                'course' => $this->user['course'],
-            ]);
-        }
+        // if(isset($this->user['link'])){
+        //     return $this->subject('NEXT University gift')->view('email.register-gift')->with([
+        //         'email' => $this->user['email_sender'],
+        //         'course' => $this->user['course'],
+        //         'link' => $this->user['link'],
+        //     ]);
+        // }else{
+        //     return $this->subject('NEXT University gift')->view('email.notify-gift')->with([
+        //         'email' => $this->user['email_sender'],
+        //         'course' => $this->user['course'],
+        //     ]);
+        // }
+
+        return $this->subject('NEXT MBA gift')->view('email.notify-gift')->with([
+            'email' => $this->user['email_sender'],
+            'course' => $this->user['course'],
+        ]);
         
     }
 }

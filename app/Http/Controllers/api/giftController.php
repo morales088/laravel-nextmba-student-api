@@ -11,6 +11,7 @@ use App\Mail\GiftEmail;
 use App\Models\Courseinvitation;
 use App\Models\Studentcourse;
 use App\Models\Student;
+use App\Models\Course;
 use DB;
 
 class giftController extends Controller
@@ -196,6 +197,7 @@ class giftController extends Controller
     public function sendGift2(Request $request){
         $userId = auth('api')->user()->id;
         $fe_link = env('FRONTEND_LINK');
+        $giftable_gift = env('GIFTABLE_DATE');
 
         $request->validate([
             'course_id' => 'required|numeric|min:1|exists:courses,id',
@@ -208,11 +210,90 @@ class giftController extends Controller
                     from students s
                     left join studentcourses sc ON s.id = sc.studentId
                     where s.status <> 0 and sc.status <> 0 and s.email = '$request->email' and sc.courseId = $request->course_id");
+        
+        $is_giftable = COLLECT(\DB::SELECT("SELECT * from payments where id = $request->payment_id and created_at < '$giftable_gift'"))->first();
 
-        if($check_qty->quantity < 0 || !empty($check_recipient_course)){
-            return response()->json(["message" => "zero courses available / recipient already has this course"], 422);
+        // dd($check_available_qty->quantity < 0, !empty($check_recipient_course), empty($is_giftable));
+
+        if($check_available_qty->quantity < 0 || !empty($check_recipient_course) || empty($is_giftable)){
+            return response()->json(["message" => "zero courses available / recipient already has this course / course expired"], 422);
         }
 
+        $DBtransaction = DB::transaction(function() use ($request, $userId, $fe_link, $giftable_gift, $check_available_qty) {
+            $sender = auth('api')->user();
+            $course = Course::find($request->course_id);
+            
+            $email_check = Student::WHERE('email', '=', $request->email)->first();
+            
+            if($email_check){
+                // check if student exist
+                //     return student id
+
+                // dd($email_check->id);
+                $student_id = $email_check->id;
+
+                // notify user thru email
+                $user = [
+                    'email_sender' => $sender->email,
+                    'course' => $course->name
+                ];
+                // dd($user);
+                Mail::to($request->email)->send(new GiftEmail($user));
+
+            }else{
+                // else create student
+                //     create student acc
+                //     return student id
+                $name = strtok($request->email, '@');
+                
+                $password = Student::generate_password();
+                $student = Student::create($request->only('phone', 'location', 'company', 'position', 'field') + 
+                            [
+                                'name' => $name,
+                                'email' => $request->email,
+                                'password' => Hash::make($password),
+                                'updated_at' => now()
+                            ]);
+
+                $student_id = $student->id;
+
+                // send account info thru email
+                $user = [
+                    'email_sender' => $sender->email,
+                    'course' => $course->name,
+                    'email' => $request->email,
+                    'password' => $password
+                ];
+                // dd($user);
+                Mail::to($request->email)->send(new AccountCredentialEmail($user));
+
+            }
+            
+            // dd($student_id, $check_available_qty, --$check_available_qty->quantity);
+
+            // add course to student
+            $data = ['studentId' => $student_id, 'courseId' => $request->course_id, 'qty' => 1];
+            Studentcourse::insertStudentCourse($data);
+
+            // deduct course to student_course table
+            DB::table('studentcourses')
+            ->where('id', $check_available_qty->id)
+            ->update(['quantity' => --$check_available_qty->quantity, 'updated_at' => now()]);
+            
+            // insert data to course_invitations
+            return Courseinvitation::create($request->only('icon') + 
+            [
+                'from_student_id' => $userId,
+                'from_payment_id' => $request->payment_id,
+                'course_id' => $request->course_id,
+                'email' => $request->email,
+                'status' => 2,
+                // 'code' => $code              change code to nullable
+            ]);
+            
+        });
+        
+        return response(["message" => "Gift successfully sent."], 200);
 
     }
 }
