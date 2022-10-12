@@ -49,6 +49,12 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/billing", "api\studentController@getBilling");
     Route::middleware("auth:api")->post("/refund", "api\studentController@refund");
 
+    Route::middleware("auth:api")->get("/gift", "api\giftController@getGift");
+    Route::middleware("auth:api")->post("/gift/send", "api\giftController@sendGift2");
+    // Route::middleware("auth:api")->post("/gift/send", "api\giftController@sendGift");
+    Route::post("/gift/register", "api\giftController@register");
+    
+
     
     Route::middleware("auth:api")->get("/settings", "api\studentController@getStudentSettings");
     Route::middleware("auth:api")->post("/settings", "api\studentController@updateStudentSettings");
