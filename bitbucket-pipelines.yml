@@ -26,3 +26,20 @@ pipelines:
                 REMOTE_PATH: $REMOTE_PATH
                 LOCAL_PATH: '$(pwd)'
                 DELETE_FLAG: 'false'
+    develop:
+      - step:
+          name: Composer Install
+          script:
+            - composer install
+      - step:
+          name: Deploy to Dev
+          deployment: Staging
+          trigger: manual
+          script:
+            - pipe: atlassian/ftp-deploy:0.3.7
+              variables:
+                USER: $USER
+                PASSWORD: $PASSWORD
+                SERVER: $SERVER
+                REMOTE_PATH: $REMOTE_PATH_DEV
+                DELETE_FLAG: 'false'
