@@ -26,7 +26,7 @@ class giftController extends Controller
                             left join payment_items pi ON p.id = pi.payment_id
                             left join courses c ON c.id = pi.product_id
                             left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
-                            where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
+                            where pi.status <> 0 and c.id <> 0 and sc.status <> 0 p.status = 'Paid' and p.student_id = $userId");
 
         foreach ($courses as $key => $value) {
 
