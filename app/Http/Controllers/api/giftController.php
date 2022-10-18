@@ -30,12 +30,17 @@ class giftController extends Controller
 
         foreach ($courses as $key => $value) {
 
-            $owner = DB::SELECT("SELECT email FROM students where id = $userId and status <> 0");
+            $owner = DB::SELECT("SELECT email, last_login FROM students where id = $userId and status <> 0");
 
-            $gift = DB::SELECT("SELECT email,
-                                    id gift_id,
-                                    (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) status FROM course_invitations 
-                                    where from_student_id = $userId and from_payment_id = $value->payment_id and course_id = $value->course_id and status <> 0");
+            // $gift = DB::SELECT("SELECT email,
+            //                         id gift_id,
+            //                         (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) status FROM course_invitations 
+            //                         where from_student_id = $userId and from_payment_id = $value->payment_id and course_id = $value->course_id and status <> 0");
+
+            $gift = DB::SELECT("SELECT ci.email, ci.id gift_id, (CASE WHEN ci.status = 1 THEN 'pending' WHEN ci.status = 2 THEN 'active' END) status, last_login
+                                    FROM course_invitations ci
+                                    left join students s ON s.email = ci.email
+                                    where ci.from_student_id = $userId and ci.from_payment_id = $value->payment_id and ci.course_id = $value->course_id and ci.status <> 0");
 
             foreach ($gift as $key2 => $value2) {
                 array_push($owner, $value2);
