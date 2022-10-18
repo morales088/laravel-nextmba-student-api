@@ -587,7 +587,7 @@ class studentController extends Controller
                             ]
                             );
                             
-        $link = env('APP_URL').'/api/student/confirm_password/?info='.$random;
+        $link = env('reset_route').'?info='.$random;
         
         // dd($request->all(), $code, $info, $link);
         $data = [
@@ -597,6 +597,35 @@ class studentController extends Controller
 
         
         return response(["message" => "success"], 200);
+    }
+    
+    public function updatePassword(Request $request){
+        
+        $login = $request->validate([
+            'code' => 'required|string',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $find_user = Student::where('forgot_password_code','=', $request->code)->first();
+        
+        if($find_user){
+
+            $password = Hash::make($request->password);
+            $user = Student::find($find_user->id);
+            $user->update(
+                        [ 
+                            'password' => $password,
+                            'forgot_password_code' => null,
+                            'updated_at' => now()
+                        ]
+                        );
+                        
+            return response()->json(["user" => $user], 200);
+
+        }else{
+            return response()->json(["message" => "invalid code"], 204);
+        }
+
     }
 
     public function confirmPassword(Request $request){
