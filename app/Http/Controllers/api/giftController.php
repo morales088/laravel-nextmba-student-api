@@ -21,12 +21,13 @@ class giftController extends Controller
         $userId = auth('api')->user()->id;
         $date = env('GIFTABLE_DATE');
         
-        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, sc.quantity as unconsumed_course, IF(p.created_at < '$date', true, false) is_giftable
-                            from payments p
-                            left join payment_items pi ON p.id = pi.payment_id
-                            left join courses c ON c.id = pi.product_id
-                            left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
-                            where pi.status <> 0 and c.id <> 0 and sc.status <> 0 and p.status = 'Paid' and p.student_id = $userId");
+        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, sc.quantity as unconsumed_course, IF(p.created_at < '$date', true, false) is_giftable, s.last_login
+                                from payments p
+                                left join payment_items pi ON p.id = pi.payment_id
+                                left join courses c ON c.id = pi.product_id
+                                left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
+                                left join students s ON s.id = p.student_id
+                                where pi.status <> 0 and c.id <> 0 and sc.status <> 0 and p.status = 'Paid' and p.student_id = $userId");
 
         foreach ($courses as $key => $value) {
 
