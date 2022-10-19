@@ -63,7 +63,7 @@ Route::prefix("/student")->group( function (){
 
     
     Route::post("/forgot_password", "api\studentController@forgotPasword");
-    Route::get("/confirm_password", "api\studentController@confirmPassword");
+    Route::post("/confirm_password", "api\studentController@updatePassword");
     
 
 });
