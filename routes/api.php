@@ -56,7 +56,7 @@ Route::prefix("/student")->group( function (){
 
 
     Route::middleware("auth:api")->post("/message/send", "api\ChatController@send");
-    Route::middleware("auth:api")->post("/message/subscribe", "api\ChatController@subscribe");
+    Route::middleware("auth:api")->post("/message/delete", "api\ChatController@delete");
     
     
     Route::middleware("auth:api")->get("/settings", "api\studentController@getStudentSettings");

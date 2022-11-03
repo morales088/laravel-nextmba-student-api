@@ -18,24 +18,24 @@ class ChatController extends Controller
             'name' => 'required|string',
             'message' => 'required|string',
             'channel' => 'required|string',
-            'is_delete' => 'boolean',
-            'message_id' => 'string'
+            // 'is_delete' => 'boolean',
+            // 'message_id' => 'string'
         ]);
 
-        dd($request->all(), !$request->is_delete);
+        // dd($request->all(), !$request->is_delete);
 
-        if(!empty($request->is_delete) || $request->is_delete){
+        // if(!empty($request->is_delete) || $request->is_delete){
 
-            broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
+        //     broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
 
-        }else{
+        // }else{
 
             $now = now();
             $message_id = $now->format('YmdHisu');
             $request->query->add(['message_id' => $message_id]);
 
             broadcast(new Message($request->name, $request->message, $request->channel) )->toOthers();
-        }
+        // }
 
         // event(new Message($request->name, $request->message, $request->channel) );
         
@@ -43,14 +43,17 @@ class ChatController extends Controller
 
         return response(["info" => $request->all()], 200);
     }
+
+    public function delete(Request $request){
+
+        $request->validate([
+            'channel' => 'required|string',
+            'message_id' => 'requiredstring'
+        ]);
+
+        broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
+
+        return response(["info" => $request->all()], 200);
+    }
     
-    // public function subscribe(Request $request){
-
-    //     $request->validate([
-    //         'channel' => 'required|string',
-    //     ]);
-
-    //     $channel = Echo.channel($request->channel);
-    //     dd($channel);
-    // }
 }
