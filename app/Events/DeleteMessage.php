@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class Message implements ShouldBroadcast
+class DeleteMessage implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,12 +20,9 @@ class Message implements ShouldBroadcast
      * @return void
      */
     public function __construct(
-        public string $name,
-        public string $message,
+        public string $message_id,
         public string $channel,
-        // public string $message_id,
-        
-    )
+        )
     {
         //
     }
@@ -37,14 +34,12 @@ class Message implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        // dd($this->name, $this->message, $this->channel, 'presence-'.$this->channel);
+        // return new PrivateChannel('channel-name');
         return new PrivateChannel($this->channel);
-        // return new PresenceChannel($this->channel);
-        // return [$this->channel];
     }
 
     public function broadcastAs()
     {
-        return 'chat_message';
+        return 'delete_message';
     }
 }
