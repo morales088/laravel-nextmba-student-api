@@ -21,8 +21,11 @@ class ChatController extends Controller
 
         // event(new Message($request->name, $request->message, $request->channel) );
         broadcast(new Message($request->name, $request->message, $request->channel) )->toOthers();
+        
 
-        return response(["info" => $request->all(), "date_sent" => now()], 200);
+        $request->query->add(['date_sent' => now()]);
+
+        return response(["info" => $request->all()], 200);
     }
 
     // public function subscribe(Request $request){
