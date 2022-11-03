@@ -36,8 +36,8 @@ class Message implements ShouldBroadcast
     public function broadcastOn()
     {
         // dd($this->name, $this->message, $this->channel, 'presence-'.$this->channel);
-        // return new PrivateChannel('private-'.$this->channel);
-        return new PresenceChannel('presence-'.$this->channel);
+        return new PrivateChannel($this->channel);
+        // return new PresenceChannel($this->channel);
         // return [$this->channel];
     }
 
