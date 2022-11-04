@@ -51,9 +51,18 @@ class ChatController extends Controller
             'message_id' => 'required|string'
         ]);
 
-        broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
+        $user = auth('api')->user();
 
-        return response(["info" => $request->all()], 200);
+        // dd($user->chat_moderator);
+
+        if($user->chat_moderator){
+
+            broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
+
+            return response(["info" => $request->all()], 200);
+        }else{
+            return response(["message" => "Not authorized to delete message."], 401);
+        }
     }
     
 }
