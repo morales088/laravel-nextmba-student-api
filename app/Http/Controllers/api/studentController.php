@@ -177,7 +177,8 @@ class studentController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
         
-        $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, profile_picture, created_at, updated_at
+        // $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, profile_picture, created_at, updated_at
+        $student = COLLECT(\DB::SELECT("select *
                                 from students s where id = $request->id"))->first();
                                 
         $student->links = DB::SELECT("select * from links where studentId = $student->id");
