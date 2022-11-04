@@ -23,7 +23,7 @@ class Message implements ShouldBroadcast
         public string $name,
         public string $message,
         public string $channel,
-        // public string $message_id,
+        public string $message_id,
         
     )
     {

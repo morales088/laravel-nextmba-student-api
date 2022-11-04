@@ -34,7 +34,7 @@ class ChatController extends Controller
             $message_id = $now->format('YmdHisu');
             $request->query->add(['message_id' => $message_id]);
 
-            broadcast(new Message($request->name, $request->message, $request->channel) )->toOthers();
+            broadcast(new Message($request->name, $request->message, $request->channel, $request->message_id) )->toOthers();
         // }
 
         // event(new Message($request->name, $request->message, $request->channel) );
@@ -48,7 +48,7 @@ class ChatController extends Controller
 
         $request->validate([
             'channel' => 'required|string',
-            'message_id' => 'requiredstring'
+            'message_id' => 'required|string'
         ]);
 
         broadcast(new DeleteMessage($request->message_id, $request->channel) )->toOthers();
