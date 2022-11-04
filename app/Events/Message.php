@@ -24,6 +24,7 @@ class Message implements ShouldBroadcast
         public string $message,
         public string $channel,
         public string $message_id,
+        public string $date_sent,
         
     )
     {
