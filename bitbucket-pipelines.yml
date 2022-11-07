@@ -41,5 +41,6 @@ pipelines:
                 USER: $USER
                 PASSWORD: $PASSWORD
                 SERVER: $SERVER
+                LOCAL_PATH: '$(pwd)'
                 REMOTE_PATH: $REMOTE_PATH_DEV
                 DELETE_FLAG: 'false'
