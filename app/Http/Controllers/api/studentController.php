@@ -25,6 +25,7 @@ class studentController extends Controller
 
         $request->query->add(['id' => $moduleId]);
         $userId = auth('api')->user()->id;
+        $chat_visibility = env('chat_disabled');
 
         $request->validate([
             'id' => 'numeric|min:1|exists:modules,id',
@@ -62,7 +63,7 @@ class studentController extends Controller
         $student_module->files = DB::SELECT("SELECT * FROM module_files where moduleId = $moduleId and status <> 0");
 
         // dd($request->all(), $student_module);
-        return response(["student_module" => $student_module], 200);
+        return response(["student_module" => $student_module, "chat_disabled" => $chat_visibility], 200);
     }
 
     public function getCoursesByType(Request $request, $course_type = 'all'){
