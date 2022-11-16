@@ -209,8 +209,13 @@ class giftController extends Controller
             'payment_id' => 'required|numeric|min:1|exists:payments,id',
             'email' => 'required|string|email',
         ]);
-
+        
         $check_available_qty = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
+        $available_course_per_payment = COLLECT(\DB::SELECT("select pi.quantity course_qty, count(ci.id) number_of_gift, (pi.quantity - 1) - count(ci.id) available_course
+                                                                from payments p
+                                                                left join payment_items pi ON pi.payment_id = p.id
+                                                                left join course_invitations ci ON ci.from_payment_id = p.id and ci.course_id = pi.product_id
+                                                                where p.id = $request->payment_id and pi.product_id = $request->course_id"))->first();
         $check_recipient_course = DB::SELECT("select *
                     from students s
                     left join studentcourses sc ON s.id = sc.studentId
@@ -218,9 +223,10 @@ class giftController extends Controller
         
         $is_giftable = COLLECT(\DB::SELECT("SELECT * from payments where id = $request->payment_id and created_at > '$giftable_gift'"))->first();
 
-        // dd($check_available_qty->quantity < 0, !empty($check_recipient_course), empty($is_giftable), $is_giftable);
+        // dd($check_available_qty->quantity, $check_available_qty->quantity < 0, !empty($check_recipient_course), empty($is_giftable), $is_giftable);
+        // dd($available_course_per_payment, $available_course_per_payment->available_course <= 0);
 
-        if($check_available_qty->quantity < 0 || !empty($check_recipient_course) || empty($is_giftable)){
+        if($available_course_per_payment->available_course <= 0 || $check_available_qty->quantity < 0 || !empty($check_recipient_course) || empty($is_giftable)){
             return response()->json(["message" => "zero courses available / recipient already has this course / course expired"], 422);
         }
 
