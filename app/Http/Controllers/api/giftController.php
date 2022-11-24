@@ -242,7 +242,7 @@ class giftController extends Controller
             return response()->json(["message" => "zero courses available / recipient already has this course / course expired"], 422);
         }
 
-        $DBtransaction = DB::transaction(function() use ($request, $userId, $fe_link, $giftable_gift, $check_available_qty) {
+        $DBtransaction = DB::transaction(function() use ($request, $userId, $fe_link, $giftable_gift) {
             $sender = auth('api')->user();
             $course = Course::find($request->course_id);
             
