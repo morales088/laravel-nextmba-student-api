@@ -33,11 +33,16 @@ class giftController extends Controller
                             left join payment_items pi ON p.id = pi.payment_id
                             left join courses c ON c.id = pi.product_id
                             where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
-
+                            
         foreach ($courses as $key => $value) {
+            
+            $user = [];
 
-            $owner = DB::SELECT("SELECT email, last_login FROM students where id = $userId and status <> 0");
-
+            // dd($owner);
+            if($key == 0){
+                $owner = DB::SELECT("SELECT email, last_login FROM students where id = $userId and status <> 0");
+                array_push($user, $owner);
+            }
             // $gift = DB::SELECT("SELECT email,
             //                         id gift_id,
             //                         (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) status FROM course_invitations 
@@ -49,10 +54,10 @@ class giftController extends Controller
                                     where ci.from_student_id = $userId and ci.from_payment_id = $value->payment_id and ci.course_id = $value->course_id and ci.status <> 0");
 
             foreach ($gift as $key2 => $value2) {
-                array_push($owner, $value2);
+                array_push($user, $value2);
             }
             
-            $value->users = $owner;
+            $value->users = $user;
             
         }
         
