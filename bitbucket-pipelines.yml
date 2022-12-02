@@ -26,6 +26,10 @@ pipelines:
                 REMOTE_PATH: $REMOTE_PATH
                 LOCAL_PATH: '$(pwd)'
                 DELETE_FLAG: 'false'
+            - pipe: atlassian/slack-notify:2.0.0
+              variables:
+                WEBHOOK_URL: 'https://hooks.slack.com/services/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'
+                MESSAGE: 'NEXTMBA Student Portal API Deployed to Production'
     develop:
       - step:
           name: Composer Install

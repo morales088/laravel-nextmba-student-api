@@ -30,7 +30,6 @@ class authorizationController extends Controller
         $student->update(
                         [ 'last_login' => $now, 'updated_at' => now()]
                         );
-
         // dd($request->all(), $accessToken, $student);
         return response()->json(["student" => $user, "access_token" => $accessToken], 200);
         
