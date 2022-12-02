@@ -21,17 +21,28 @@ class giftController extends Controller
         $userId = auth('api')->user()->id;
         $date = env('GIFTABLE_DATE');
         
-        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, sc.quantity as unconsumed_course, IF(p.created_at < '$date', true, false) is_giftable
+        // $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, sc.quantity as unconsumed_course, IF(p.created_at < '$date', true, false) is_giftable
+        //                     from payments p
+        //                     left join payment_items pi ON p.id = pi.payment_id
+        //                     left join courses c ON c.id = pi.product_id
+        //                     left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
+        //                     where pi.status <> 0 and c.id <> 0 and sc.status <> 0 and p.status = 'Paid' and p.student_id = $userId");
+
+        $courses = DB::SELECT("select c.id course_id, c.name course_name, pi.quantity course_qty, p.id payment_id, p.student_id, pi.giftable as unconsumed_course, IF(p.created_at > '$date', true, false) is_giftable, p.created_at
                             from payments p
                             left join payment_items pi ON p.id = pi.payment_id
                             left join courses c ON c.id = pi.product_id
-                            left join studentcourses sc ON sc.studentId = p.student_id and sc.courseId = c.id
-                            where pi.status <> 0 and c.id <> 0 and sc.status <> 0 and p.status = 'Paid' and p.student_id = $userId");
-
+                            where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
+                            
         foreach ($courses as $key => $value) {
+            
+            $user = [];
 
-            $owner = DB::SELECT("SELECT email, last_login FROM students where id = $userId and status <> 0");
-
+            // dd($owner);
+            if($key == 0){
+                $owner = collect(\DB::SELECT("SELECT email, last_login FROM students where id = $userId and status <> 0"))->first();
+                array_push($user, $owner);
+            }
             // $gift = DB::SELECT("SELECT email,
             //                         id gift_id,
             //                         (CASE WHEN status = 1 THEN 'pending' WHEN status = 2 THEN 'active' END) status FROM course_invitations 
@@ -43,10 +54,10 @@ class giftController extends Controller
                                     where ci.from_student_id = $userId and ci.from_payment_id = $value->payment_id and ci.course_id = $value->course_id and ci.status <> 0");
 
             foreach ($gift as $key2 => $value2) {
-                array_push($owner, $value2);
+                array_push($user, $value2);
             }
             
-            $value->users = $owner;
+            $value->users = $user;
             
         }
         
@@ -203,19 +214,25 @@ class giftController extends Controller
         $userId = auth('api')->user()->id;
         $fe_link = env('FRONTEND_LINK');
         $giftable_gift = env('GIFTABLE_DATE');
-
+        
         $request->validate([
             'course_id' => 'required|numeric|min:1|exists:courses,id',
             'payment_id' => 'required|numeric|min:1|exists:payments,id',
             'email' => 'required|string|email',
         ]);
         
-        $check_available_qty = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
-        $available_course_per_payment = COLLECT(\DB::SELECT("select pi.quantity course_qty, count(ci.id) number_of_gift, (pi.quantity - 1) - count(ci.id) available_course
-                                                                from payments p
-                                                                left join payment_items pi ON pi.payment_id = p.id
-                                                                left join course_invitations ci ON ci.from_payment_id = p.id and ci.course_id = pi.product_id
-                                                                where p.id = $request->payment_id and pi.product_id = $request->course_id"))->first();
+        // $check_available_qty = COLLECT(\DB::SELECT("SELECT * from studentcourses where studentId = $userId and courseId = $request->course_id and status <> 0"))->first();
+        // $available_course_per_payment = COLLECT(\DB::SELECT("select pi.quantity course_qty, count(ci.id) number_of_gift, (pi.quantity - 1) - count(ci.id) available_course
+        //                                                         from payments p
+        //                                                         left join payment_items pi ON pi.payment_id = p.id
+        //                                                         left join course_invitations ci ON ci.from_payment_id = p.id and ci.course_id = pi.product_id
+        //                                                         where p.id = $request->payment_id and pi.product_id = $request->course_id"))->first();
+
+        $available_course_per_payment = COLLECT(\DB::SELECT("select pi.* 
+                                                from payments p
+                                                left join payment_items pi ON pi.payment_id = p.id
+                                                where p.id = $request->payment_id and pi.product_id = $request->course_id and p.status = 'paid'"))->first();
+
         $check_recipient_course = DB::SELECT("select *
                     from students s
                     left join studentcourses sc ON s.id = sc.studentId
@@ -226,11 +243,11 @@ class giftController extends Controller
         // dd($check_available_qty->quantity, $check_available_qty->quantity < 0, !empty($check_recipient_course), empty($is_giftable), $is_giftable);
         // dd($available_course_per_payment, $available_course_per_payment->available_course <= 0);
 
-        if($available_course_per_payment->available_course <= 0 || $check_available_qty->quantity < 0 || !empty($check_recipient_course) || empty($is_giftable)){
+        if($available_course_per_payment->giftable <= 0 || !empty($check_recipient_course) || empty($is_giftable)){
             return response()->json(["message" => "zero courses available / recipient already has this course / course expired"], 422);
         }
 
-        $DBtransaction = DB::transaction(function() use ($request, $userId, $fe_link, $giftable_gift, $check_available_qty) {
+        $DBtransaction = DB::transaction(function() use ($request, $userId, $fe_link, $giftable_gift, $check_recipient_course, $available_course_per_payment) {
             $sender = auth('api')->user();
             $course = Course::find($request->course_id);
             
@@ -287,9 +304,15 @@ class giftController extends Controller
             Studentcourse::insertStudentCourse($data);
 
             // deduct course to student_course table
-            DB::table('studentcourses')
-            ->where('id', $check_available_qty->id)
-            ->update(['quantity' => --$check_available_qty->quantity, 'updated_at' => now()]);
+                // DB::table('studentcourses')
+                // ->where('id', $check_available_qty->id)
+                // ->update(['quantity' => --$check_available_qty->quantity, 'updated_at' => now()]);
+
+                DB::table('payment_items')
+                ->where('id', $available_course_per_payment->id)
+                ->update(['quantity' => --$available_course_per_payment->giftable, 'updated_at' => now()]);
+
+
             
             // insert data to course_invitations
             return Courseinvitation::create($request->only('icon') + 

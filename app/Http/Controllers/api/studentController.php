@@ -25,6 +25,8 @@ class studentController extends Controller
 
         $request->query->add(['id' => $moduleId]);
         $userId = auth('api')->user()->id;
+        $chat_visibility = env('chat_disabled');
+        $live_stream_visibility = env('live_stream_disabled');
 
         $request->validate([
             'id' => 'numeric|min:1|exists:modules,id',
@@ -32,8 +34,9 @@ class studentController extends Controller
 
         $student_module = COLLECT(\DB::SELECT("select m.*, sm.remarks student_remarks,
         (CASE WHEN m.status = 1 THEN 'draft' WHEN m.status = 2 THEN 'published' WHEN m.status = 3 THEN 'archived' END) module_status,
-        (CASE WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
-		(CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status
+        (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
+		(CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status,
+        m.stream_info, m.stream_json, m.uid, m.srt_url
         from modules m
         left join student_modules sm ON m.id = sm.moduleId
         where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
@@ -62,7 +65,7 @@ class studentController extends Controller
         $student_module->files = DB::SELECT("SELECT * FROM module_files where moduleId = $moduleId and status <> 0");
 
         // dd($request->all(), $student_module);
-        return response(["student_module" => $student_module], 200);
+        return response(["student_module" => $student_module, "chat_disabled" => $chat_visibility, "live_stream_visibility" => $live_stream_visibility], 200);
     }
 
     public function getCoursesByType(Request $request, $course_type = 'all'){
@@ -177,7 +180,8 @@ class studentController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
         
-        $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, profile_picture, created_at, updated_at
+        // $student = COLLECT(\DB::SELECT("select id, name, email, phone, location, company, position, field, last_login, profile_picture, created_at, updated_at
+        $student = COLLECT(\DB::SELECT("select *
                                 from students s where id = $request->id"))->first();
                                 
         $student->links = DB::SELECT("select * from links where studentId = $student->id");
