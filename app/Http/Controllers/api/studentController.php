@@ -43,7 +43,7 @@ class studentController extends Controller
         
         $student_module->description = urldecode($student_module->description);
 
-        $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+        $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.uid topic_uid, t.description topic_description,
                                 s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
                                 from student_modules sm
                                 left join modules m ON m.id = sm.moduleId
