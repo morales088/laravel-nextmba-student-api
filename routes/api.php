@@ -63,10 +63,13 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->post("/settings", "api\studentController@updateStudentSettings");
 
     Route::middleware("auth:api")->post("/issue/email", "api\studentController@emailIssue");
-
+    
     
     Route::post("/forgot_password", "api\studentController@forgotPasword");
     Route::post("/confirm_password", "api\studentController@updatePassword");
+
+
     
+    Route::middleware("auth:api")->post("/stream/watch", "api\streamController@watchReplay");
 
 });
