@@ -34,4 +34,20 @@ class authorizationController extends Controller
         return response()->json(["student" => $user, "access_token" => $accessToken], 200);
         
     }
+
+    public function adminAccessLogin (Request $request){
+        
+        $login = $request->validate([
+            'email' => 'required|string|exists:students,email,status,1',
+            // 'password' => 'required|string'
+        ]);
+
+        $user = Student::where('email', $request->email)->first();
+        // $accessToken = Auth::user()->createToken('authToken')->accessToken;
+        $accessToken = $user->createToken('access_token')->accessToken;
+        // dd($accessToken, $user);
+
+        return response()->json(["student" => $user, "access_token" => $accessToken], 200);
+
+    }
 }
