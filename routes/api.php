@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix("/user")->group( function (){
     Route::post("/login", "api\authorizationController@personalAccessLogin");
+    Route::middleware("api_token")->post("/admin-login", "api\authorizationController@adminAccessLogin");
 });
 
 
