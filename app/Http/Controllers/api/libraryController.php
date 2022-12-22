@@ -42,4 +42,17 @@ class libraryController extends Controller
 
     }
 
+    public function perlLibrary(Request $request, $id){
+                
+        $request->query->add(['id' => $id]);
+        $speaker = $request->validate([
+            'id' => 'required|string|exists:video_libraries,id',
+        ]);
+        
+        $video_library = VideoLibrary::where('id', $id)->first();
+
+        return response(["video_library" => $video_library], 200);
+
+    }
+
 }

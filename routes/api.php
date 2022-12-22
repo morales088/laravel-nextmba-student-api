@@ -74,5 +74,6 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->post("/stream/watch", "api\streamController@watchReplay");
 
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
+    Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
 
 });
