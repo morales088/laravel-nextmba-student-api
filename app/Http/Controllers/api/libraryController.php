@@ -26,21 +26,19 @@ class libraryController extends Controller
 
         $video_libraries = $video_libraries->where('status', 1)->where('broadcast_status', 1);
 
-        if(!empty($broadcast_status)) $video_libraries = $video_libraries->where('broadcast_status', $broadcast_status); ;
-
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
                                 ->orderBy('id', 'ASC')
                                 ->get();
 
-        $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
+        // $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
         
-        $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
-            'path' => $request->url(),
-            'query' => $request->query(),
-        ]);
+        // $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
+        //     'path' => $request->url(),
+        //     'query' => $request->query(),
+        // ]);
 
-        return response(["video_libraries" => $videos], 200);
+        return response(["video_libraries" => $video_libraries], 200);
 
     }
 
