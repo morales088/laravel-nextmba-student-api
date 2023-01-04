@@ -13,6 +13,7 @@ class libraryController extends Controller
 {
     public function index(Request $request){
 
+        $user = auth('api')->user();
         $currentPage = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
 
@@ -21,10 +22,13 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
-        
+        // dd($user->created_at);
         $video_libraries = VideoLibrary::query();
 
-        $video_libraries = $video_libraries->where('status', 1)->where('broadcast_status', 1);
+        $video_libraries = $video_libraries
+                            ->where('date', '<=', $user->created_at)
+                            ->where('status', 1)
+                            ->where('broadcast_status', 1);
                             // ->orderBy('id', 'ASC')
                             // ->get();
 
