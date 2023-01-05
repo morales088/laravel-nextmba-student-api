@@ -310,7 +310,7 @@ class giftController extends Controller
 
                 DB::table('payment_items')
                 ->where('id', $available_course_per_payment->id)
-                ->update(['quantity' => --$available_course_per_payment->giftable, 'updated_at' => now()]);
+                ->update(['giftable' => --$available_course_per_payment->giftable, 'updated_at' => now()]);
 
 
             
