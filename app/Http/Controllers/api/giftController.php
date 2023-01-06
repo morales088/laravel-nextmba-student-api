@@ -227,7 +227,15 @@ class giftController extends Controller
         //                                                         left join payment_items pi ON pi.payment_id = p.id
         //                                                         left join course_invitations ci ON ci.from_payment_id = p.id and ci.course_id = pi.product_id
         //                                                         where p.id = $request->payment_id and pi.product_id = $request->course_id"))->first();
-
+        
+        $check_course_id = COLLECT(\DB::SELECT("select pi.* 
+                                                from payments p
+                                                left join payment_items pi ON pi.payment_id = p.id
+                                                where p.id = $request->payment_id 
+                                                and pi.product_id = $request->course_id 
+                                                and p.status = 'paid'
+                                                and pi.product_id = 3"))->first();
+        dd($check_course_id, !empty($check_course_id));
         $available_course_per_payment = COLLECT(\DB::SELECT("select pi.* 
                                                 from payments p
                                                 left join payment_items pi ON pi.payment_id = p.id
