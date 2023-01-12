@@ -29,14 +29,14 @@ class libraryController extends Controller
                             ->where('date', '<=', $user->created_at)
                             ->where('status', 1)
                             ->where('broadcast_status', 1);
-                            // ->orderBy('id', 'ASC')
+                            // ->orderBy('date', 'DESC');
                             // ->get();
-
+                            
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
-                                ->orderBy('id', 'ASC')
+                                ->orderBy('date', 'DESC')
                                 ->get();
-
+        
         $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
         
         $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
