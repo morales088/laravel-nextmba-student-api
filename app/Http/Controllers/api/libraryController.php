@@ -35,6 +35,7 @@ class libraryController extends Controller
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
                                 ->orderBy('date', 'DESC')
+                                ->orderBy('name', 'ASC')
                                 ->get();
         
         $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
