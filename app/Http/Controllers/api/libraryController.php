@@ -26,7 +26,11 @@ class libraryController extends Controller
         $video_libraries = VideoLibrary::query();
 
         $video_libraries = $video_libraries
-                            ->where('date', '<=', $user->created_at)
+                            // ->where('date', '<=', $user->created_at)
+                            ->where(function($query) use($user) {
+                                $query->where('date', '<=', $user->created_at);
+                                $query->orWhere('category', 'additional lecture');
+                            })
                             ->where('status', 1)
                             ->where('broadcast_status', 1);
                             // ->orderBy('date', 'DESC');
