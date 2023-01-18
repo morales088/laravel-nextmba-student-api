@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\PartnershipController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,4 +77,8 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
     Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
 
+});
+
+Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
+    Route::post("/apply", "applyPartnership");
 });
