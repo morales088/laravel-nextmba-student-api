@@ -13,6 +13,7 @@ class libraryController extends Controller
 {
     public function index(Request $request){
 
+        $user = auth('api')->user();
         $currentPage = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
 
@@ -21,24 +22,34 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
-        
+        // dd($user->created_at);
         $video_libraries = VideoLibrary::query();
 
-        $video_libraries = $video_libraries->where('status', 1)->where('broadcast_status', 1);
-
+        $video_libraries = $video_libraries
+                            // ->where('date', '<=', $user->created_at)
+                            ->where(function($query) use($user) {
+                                $query->where('date', '<=', $user->created_at);
+                                $query->orWhere('category', 'additional lecture');
+                            })
+                            ->where('status', 1)
+                            ->where('broadcast_status', 1);
+                            // ->orderBy('date', 'DESC');
+                            // ->get();
+                            
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
-                                ->orderBy('id', 'ASC')
+                                ->orderBy('date', 'DESC')
+                                ->orderBy('name', 'ASC')
                                 ->get();
-
-        // $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
         
-        // $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
-        //     'path' => $request->url(),
-        //     'query' => $request->query(),
-        // ]);
+        $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
+        
+        $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
+            'path' => $request->url(),
+            'query' => $request->query(),
+        ]);
 
-        return response(["video_libraries" => $video_libraries], 200);
+        return response(["video_libraries" => $videos], 200);
 
     }
 

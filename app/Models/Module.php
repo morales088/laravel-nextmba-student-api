@@ -87,11 +87,13 @@ class Module extends Model
         }else{
             $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from student_modules sm
+                                        left join students s ON s.id = sm.studentId
                                         left join modules m ON m.id = sm.moduleId
                                         left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
                                         where m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id order by m.start_date asc");
+                                        and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id 
+                                        and date(m.start_date) >= date(s.created_at) order by m.start_date asc");
             
             if($modules){
                 foreach ($modules as $key => $value) {

@@ -227,7 +227,15 @@ class giftController extends Controller
         //                                                         left join payment_items pi ON pi.payment_id = p.id
         //                                                         left join course_invitations ci ON ci.from_payment_id = p.id and ci.course_id = pi.product_id
         //                                                         where p.id = $request->payment_id and pi.product_id = $request->course_id"))->first();
-
+        
+        // $check_course_id = COLLECT(\DB::SELECT("select pi.* 
+        //                                         from payments p
+        //                                         left join payment_items pi ON pi.payment_id = p.id
+        //                                         where p.id = $request->payment_id 
+        //                                         and pi.product_id = $request->course_id 
+        //                                         and p.status = 'paid'
+        //                                         and pi.product_id = 3"))->first();
+                                                
         $available_course_per_payment = COLLECT(\DB::SELECT("select pi.* 
                                                 from payments p
                                                 left join payment_items pi ON pi.payment_id = p.id
@@ -243,7 +251,7 @@ class giftController extends Controller
         // dd($check_available_qty->quantity, $check_available_qty->quantity < 0, !empty($check_recipient_course), empty($is_giftable), $is_giftable);
         // dd($available_course_per_payment, $available_course_per_payment->available_course <= 0);
 
-        if($available_course_per_payment->giftable <= 0 || !empty($check_recipient_course) || empty($is_giftable)){
+        if($available_course_per_payment->giftable <= 0 || !empty($check_recipient_course) || empty($is_giftable) || $request->course_id != 3){
             return response()->json(["message" => "zero courses available / recipient already has this course / course expired"], 422);
         }
 
@@ -310,7 +318,7 @@ class giftController extends Controller
 
                 DB::table('payment_items')
                 ->where('id', $available_course_per_payment->id)
-                ->update(['quantity' => --$available_course_per_payment->giftable, 'updated_at' => now()]);
+                ->update(['giftable' => --$available_course_per_payment->giftable, 'updated_at' => now()]);
 
 
             
