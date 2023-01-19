@@ -13,6 +13,10 @@ use DB;
 class ChatController extends Controller
 {
     public function send(Request $request){
+        $user = auth('api')->user();
+        if($user->chat_access == 0){
+            return response(["message" => "Not authorized to send message."], 401);
+        }
 
         $request->validate([
             'name' => 'required|string',
