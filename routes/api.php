@@ -81,4 +81,5 @@ Route::prefix("/student")->group( function (){
 
 Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
     Route::post("/apply", "applyPartnership");
+    Route::put('/update_code/{student_id}', "updateAffiliateCode");
 });

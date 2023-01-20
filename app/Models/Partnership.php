@@ -10,5 +10,5 @@ class Partnership extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_id', 'affiliate_status'];
+    protected $fillable = ['student_id', 'affiliate_status', 'affiliate_code'];
 }

@@ -29,4 +29,25 @@ class PartnershipController extends Controller
             'application' => $application
         ], 201);
     }
+
+    public function updateAffiliateCode(Request $request, $student_id) {
+
+        $request->validate([
+            'affiliate_code' => 'string|required|unique:partnerships,affiliate_code'
+        ]);
+
+        $partnership = Partnership::where('student_id', $student_id)
+                        ->whereIn('affiliate_status', [1])
+                        ->where('status', '<>', 0)
+                        ->first();
+        
+        $partnership->update([
+            'affiliate_code' => $request->affiliate_code
+        ]);
+        
+        return response()->json([
+            'message' => 'Affiliate code has been updated successfully.',
+            'partnership' => $partnership
+        ], 200);
+    }
 }
