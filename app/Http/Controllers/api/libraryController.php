@@ -32,17 +32,25 @@ class libraryController extends Controller
                                 $query->orWhere('category', 'additional lecture');
                             })
                             ->where('status', 1)
-                            ->where('broadcast_status', 1);
+                            ->where('broadcast_status', 1)
+                            ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
                             // ->orderBy('date', 'DESC');
                             // ->get();
                             
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
+                                // ->orderBy('category', 'ASC')
                                 ->orderBy('date', 'DESC')
                                 ->orderBy('name', 'ASC')
                                 ->get();
         
-        $totalOrder = VideoLibrary::where('status', 1)->where('broadcast_status', 1)->count();
+        $totalOrder = VideoLibrary::where( function($query) use($user) {
+                            $query->where('date', '<=', $user->created_at);
+                            $query->orWhere('category', 'additional lecture');
+                        })
+                        ->where('status', 1)
+                        ->where('broadcast_status', 1)
+                        ->count();
         
         $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
             'path' => $request->url(),
