@@ -32,15 +32,16 @@ class libraryController extends Controller
                                 $query->orWhere('category', 'additional lecture');
                             })
                             ->where('status', 1)
-                            ->where('broadcast_status', 1);
+                            ->where('broadcast_status', 1)
                             // ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
-                            // ->orderBy('date', 'DESC');
+                            ->orderBy('category', 'DESC')
+                            ->orderBy('date', 'DESC');
                             // ->get();
                             
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
                                 // ->orderBy('category', 'ASC')
-                                ->orderBy('date', 'DESC')
+                                // ->orderBy('date', 'DESC')
                                 // ->orderBy('name', 'ASC')
                                 ->get();
         // dd(\DB::getQueryLog());
