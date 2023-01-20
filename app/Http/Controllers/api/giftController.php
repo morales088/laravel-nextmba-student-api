@@ -32,7 +32,7 @@ class giftController extends Controller
                             from payments p
                             left join payment_items pi ON p.id = pi.payment_id
                             left join courses c ON c.id = pi.product_id
-                            where pi.status <> 0 and c.id <> 0 and p.status = 'Paid' and p.student_id = $userId");
+                            where pi.status <> 0 and c.status <> 0 and c.id >= 3 and p.status = 'Paid' and p.student_id = $userId");
                             
         foreach ($courses as $key => $value) {
             
