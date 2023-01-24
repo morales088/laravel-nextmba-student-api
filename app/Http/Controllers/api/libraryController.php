@@ -22,9 +22,9 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
-        // dd($user->created_at);
         $video_libraries = VideoLibrary::query();
-
+        
+        // \DB::enableQueryLog();
         $video_libraries = $video_libraries
                             // ->where('date', '<=', $user->created_at)
                             ->where(function($query) use($user) {
@@ -33,16 +33,18 @@ class libraryController extends Controller
                             })
                             ->where('status', 1)
                             ->where('broadcast_status', 1)
-                            ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
-                            // ->orderBy('date', 'DESC');
+                            // ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
+                            ->orderBy('category', 'DESC')
+                            ->orderBy('date', 'DESC');
                             // ->get();
                             
         $video_libraries = $video_libraries->offset($offset)
                                 ->limit($perPage)
                                 // ->orderBy('category', 'ASC')
-                                ->orderBy('date', 'DESC')
-                                ->orderBy('name', 'ASC')
+                                // ->orderBy('date', 'DESC')
+                                // ->orderBy('name', 'ASC')
                                 ->get();
+        // dd(\DB::getQueryLog());
         
         $totalOrder = VideoLibrary::where( function($query) use($user) {
                             $query->where('date', '<=', $user->created_at);
