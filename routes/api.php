@@ -77,6 +77,8 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
     Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
 
+    Route::post('/invite', "api\PartnershipController@useAffiliateCode");
+
 });
 
 Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
