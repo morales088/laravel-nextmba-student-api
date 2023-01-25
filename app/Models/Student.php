@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use DB;
+use App\Models\Partnership;
+use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
+// use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
-use Laravel\Passport\HasApiTokens;
-use Illuminate\Support\Facades\Storage;
-use DB;
 
 class Student extends Authenticatable
 {
@@ -17,6 +18,10 @@ class Student extends Authenticatable
 
     protected $guarded = ['id'];
     protected $table = 'students';
+
+    public function partnership() {
+        return $this->hasOne(Partnership::class);
+    }
 
     // /**
     //  * The attributes that are mass assignable.

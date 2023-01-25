@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Models\User;
+use App\Models\Student;
 use App\Models\Partnership;
 use Illuminate\Http\Request;
 use App\Models\PartnershipInvite;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class PartnershipController extends Controller
 {
@@ -15,19 +17,69 @@ class PartnershipController extends Controller
         $this->middleware('auth:api');
     }
 
+    public function partnershipApplication(Request $request) {
+
+        $userId = auth('api')->user()->id;
+        $request->query->add(['id' => $userId]);
+        $request->validate([
+            'id' => 'numeric|min:1|exists:students,id',
+        ]);
+
+        $student = Student::find($userId);
+        if ($student->affiliate_access === 0) {
+            $existingPartnership = Partnership::where('student_id', $userId)->first();
+            if (!$existingPartnership) {
+                return response()->json([
+                    'message' => "No partnership found.",
+                    'application' => null
+                ], 200);
+            } elseif ($existingPartnership->affiliate_status == 0) {
+                return response()->json([
+                    'message' => "Your partnership application is still pending.",
+                    'application' => $student->partnership
+                ], 200);
+            } elseif ($existingPartnership->affiliate_status == 2) {
+                return response()->json([
+                    'message' => "Your partnership application has been declined.",
+                    'application' => $student->partnership
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => "Student already has a approved partnership.",
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'message' => "Student already has a partnership.",
+                'partnership' => $student->partnership
+            ], 400);
+        }
+    }
+
     public function applyPartnership(Request $request) {
 
+        $userId = Auth::user()->id;
+        $request->query->add(['id' => $userId]);
         $request->validate([
-            'student_id' => 'required|exists:students,id|unique:partnerships,student_id'
+            'id' => 'required|exists:students,id'
         ]);
+        
+        $student = Student::find($userId);
+        $existingPartnership = Partnership::where('student_id', $userId)->first();
+        if (!$existingPartnership) {
+            $application = Partnership::create([
+                'student_id' => $userId,
+                'affiliate_status' => 0, // pending
+            ]);
 
-        $application = Partnership::create([
-            'student_id' => $request->student_id,
-            'affiliate_status' => 0, // pending
-        ]);
+            return response()->json([
+                'message' => "Partnership application submitted successfully.",
+                'application' => $application
+            ], 201);
+        }
 
         return response()->json([
-            'application' => $application
+            'message' => "You have already applied for partnership."
         ], 201);
     }
 

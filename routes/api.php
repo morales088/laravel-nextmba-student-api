@@ -77,11 +77,12 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
     Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
 
+    Route::get('/affiliate', 'api\PartnershipController@partnershipApplication');
     Route::post('/invite', "api\PartnershipController@useAffiliateCode");
 
 });
 
 Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
     Route::post("/apply", "applyPartnership");
-    Route::put('/update_code/{student_id}', "updateAffiliateCode");
+    Route::put("/update-code/{student_id}", "updateAffiliateCode");
 });
