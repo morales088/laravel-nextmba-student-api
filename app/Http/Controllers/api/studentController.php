@@ -756,8 +756,8 @@ class studentController extends Controller
                                     left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
                                     where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and sc.starting <= m.start_date
                                     group by c.id) c where c.score_percentage = 100");
-        
-        foreach ($complete as $key => $complete) {                
+                                    
+        foreach ($complete as $key => $value) {
             $value->description = urldecode($value->description);
         } 
 
