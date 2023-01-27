@@ -258,4 +258,4 @@ class PartnershipController extends Controller
 //             ], 404);
 //         }
 //     }
-// }
+}
