@@ -164,9 +164,15 @@ class PartnershipController extends Controller
         ]);
 
         $student = Student::findOrFail($request->id);
-        $affiliatePayments = Payment::join('partnerships', 'payments.affiliate_code', '=', 'partnerships.affiliate_code')
-            // ->where('payments.affiliate_code', '=', 'partnerships.affiliate_code')
-            ->select('payments.commission_status', 'payments.price', 'payments.email', 'payments.created_at', 'payments.commission_percentage')
+        $partnership = Partnership::where('student_id', $userId)->first();
+        if (!$partnership) {
+            return response()->json([
+                'error' => 'No affiliate partnership found for the student.'
+            ], 404);
+        }
+
+        $affiliatePayments = Payment::where('affiliate_code', $partnership->affiliate_code)
+            ->select('commission_status', 'price', 'email', 'created_at', 'commission_percentage')
             ->get();
 
         $commission_amount = 0;
