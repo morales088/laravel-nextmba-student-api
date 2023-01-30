@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use DB;
+use App\Models\Payment;
 use App\Models\Partnership;
 use Laravel\Passport\HasApiTokens;
-use Illuminate\Support\Facades\Storage;
 // use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,8 +21,17 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     public function partnership() {
-        return $this->hasOne(Partnership::class);
+        return $this->hasOne(Partnership::class, 'student_id');
     }
+
+    // public function student() {
+    //   return $this->hasMany(Payment::class, 'student_id');
+    // }
+
+    // public function payments()
+    // {
+    //     return $this->hasMany(Payment::class);
+    // }
 
     // /**
     //  * The attributes that are mass assignable.

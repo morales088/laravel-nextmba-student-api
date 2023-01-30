@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Partnership;
 use Illuminate\Http\Request;
 use App\Models\PartnershipInvite;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PartnershipWithdraws;
 use Illuminate\Support\Facades\Auth;
@@ -94,17 +95,97 @@ class PartnershipController extends Controller
                         ->first();
 
         $request->validate([
-            'affiliate_code' => 'string|required|unique:partnerships,affiliate_code,'. $partnership->id
+            'affiliate_code' => 'unique:partnerships,affiliate_code,'. $partnership->id
         ]);
 
-        $partnership->update([
-            'affiliate_code' => $request->affiliate_code
+        if ($partnership) {
+             if ($request->affiliate_code == null) {
+                $affiliate_code = $partnership->affiliate_code;
+            } else {
+                $affiliate_code = $request->affiliate_code;
+            }
+
+            $partnership->update([
+                'affiliate_code' => $affiliate_code
+            ]);
+
+             return response()->json([
+                'message' => "Affiliate code has been updated successfully.",
+                'partnership' => $partnership
+            ]);
+        } else {
+            return response()->json([
+                'message' => "No partnership found.",
+            ]);
+        }
+    }
+
+    public function withdrawMethod(Request $request) {
+
+        $userId = Auth::user()->id;
+        $request->query->add(['id' => $userId]);
+        $request->validate([
+            'id' => 'required|exists:partnerships,student_id',
+            'withdraw_method' => 'sometimes|max:255'
         ]);
+
+        $partnership = Partnership::where('student_id', $userId)
+                        ->whereIn('affiliate_status', [1])
+                        ->where('status', '<>', 0)
+                        ->first();
         
+        if ($partnership) {
+            if ($request->withdraw_method == null) {
+                $withdraw_method = $partnership->withdraw_method;
+            } else {
+                $withdraw_method = $request->withdraw_method;
+            }
+
+            $partnership->update([
+                'withdraw_method' => $withdraw_method
+            ]);
+             return response()->json([
+                'message' => "Withdraw method added successfully.",
+                'withdrawMethod' => $partnership
+            ]);
+        } else {
+            return response()->json([
+                'message' => "No partnership found.",
+            ]);
+        }
+    }
+
+    public function getAffiliatePayments(Request $request) {
+
+        $userId = Auth::user()->id;
+        $request->query->add(['id' => $userId]);
+        $request->validate([
+            'id' => 'required|exists:partnerships,student_id'
+        ]);
+
+        $student = Student::findOrFail($request->id);
+        $affiliatePayments = Payment::join('partnerships', 'payments.affiliate_code', '=', 'partnerships.affiliate_code')
+            // ->where('payments.affiliate_code', '=', 'partnerships.affiliate_code')
+            ->select('payments.commission_status', 'payments.price', 'payments.email', 'payments.created_at', 'payments.commission_percentage')
+            ->get();
+
+        $commission_amount = 0;
+        $partnership_payments = [];
+
+        foreach ($affiliatePayments as $payment) {
+            $partnership_payments[] = [
+                // $commission_amount += $payment->price * $payment->commission_percentage,
+                'price' => $payment->price,
+                'commission_percentage' => $payment->commission_percentage,
+                'commission_amount' => round($payment->price * $payment->commission_percentage, 2),
+                'commission_status' => $payment->commission_status,
+                'email' => $payment->email,
+                'created_at' => $payment->created_at->toDateTimeString()
+            ];
+        }
         return response()->json([
-            'message' => 'Affiliate code has been updated successfully.',
-            'partnership' => $partnership
-        ], 200);
+            'affiliatePayments' => $partnership_payments
+        ]);
     }
 
 //     public function useAffiliateCode(Request $request) {
@@ -168,37 +249,6 @@ class PartnershipController extends Controller
 //         }
 //     }
 
-//     public function getAffiliatePayments(Request $request) {
-
-//         $userId = Auth::user()->id;
-//         $request->query->add(['id' => $userId]);
-//         $request->validate([
-//             'id' => 'required|exists:partnerships,student_id'
-//         ]);
-
-//         // $studentPayments = Payment::where('student_id', $request->student_id)->get();
-//         $student = Student::findOrFail($request->id);
-//         $studentPayments = $student->payments;
-//         $partnership = $student->partnership;
-
-//         $partnershipPercent = $partnership->percentage;
-//         $commissionAmount = 0;
-//         $paymentsWithCommission = [];
-
-//         foreach($studentPayments as $payment) {
-//             $commissionAmount = $payment->price * $partnershipPercent;
-//             $paymentsWithCommission[] = [
-//                 'payment_id' => $payment->id,
-//                 'email' => $payment->email,
-//                 'price' => $payment->price,
-//                 'commission_amount' => $commissionAmount,
-//                 'date' => $payment->created_at,
-//             ];
-//         }
-//         return response()->json([
-//             'payments' => $paymentsWithCommission,
-//         ], 200);
-//     }
 
 //     public function requestWithdrawal(Request $request) {
 
