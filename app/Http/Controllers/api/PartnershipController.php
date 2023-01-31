@@ -328,7 +328,7 @@ class PartnershipController extends Controller
         // $withdrawals = Auth::user()->partnershipWithdraws()->with('payment')->get();
         $withdrawals = Auth::user()->partnership_withraws()
                             ->with('user')
-                            ->where('status', 1)
+                            // ->where('status', 1)
                             ->get();
                             
         // dd($withdrawals);
