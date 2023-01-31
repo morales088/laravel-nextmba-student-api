@@ -87,6 +87,10 @@ Route::prefix("/partnership")->controller(PartnershipController::class)->group( 
     Route::put("/update-code", "updateAffiliateCode");
 
     Route::get("/payments", "getAffiliatePayments");
-    
     Route::post("/withdraw-method", "withdrawMethod");
+
+    Route::get("/withdraws", "getWithdraws");
+    Route::get("/withdrawals_info", "getWithdrawalsInfo");
+    Route::post("/request_withdrawal", "requestWithdrawal");
+    // Route::post("/withdrawal_method", "withdrawalMethod");
 });

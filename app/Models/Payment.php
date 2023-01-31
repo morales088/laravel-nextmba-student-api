@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payment extends Model
 {
     use HasFactory;
+    protected $table = 'payments';
 
-    // public function student() {
-    //     return $this->belongsTo(Student::class, 'student_id');
-    // }
+    public function student() {
+        return $this->belongsTo(Student::class);
+    }
 }

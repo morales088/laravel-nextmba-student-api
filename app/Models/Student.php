@@ -5,6 +5,7 @@ namespace App\Models;
 use DB;
 use App\Models\Payment;
 use App\Models\Partnership;
+use App\Models\PartnershipWithdraw;
 use Laravel\Passport\HasApiTokens;
 // use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,14 @@ class Student extends Authenticatable
     // {
     //     return $this->hasMany(Payment::class);
     // }
+    
+    public function partnership_withraws(){
+        return $this->hasMany(PartnershipWithdraw::class);
+    }
+
+    public function commision(){
+        return $this->hasMany(Payment::class, 'from_student_id');
+    }
 
     // /**
     //  * The attributes that are mass assignable.
