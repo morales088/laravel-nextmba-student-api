@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PartnershipWithdraw;
 use Illuminate\Support\Facades\Auth;
-use DB;
 
 class PartnershipController extends Controller
 {
