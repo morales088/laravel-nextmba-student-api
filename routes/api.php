@@ -85,4 +85,9 @@ Route::prefix("/student")->group( function (){
 Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
     Route::post("/apply", "applyPartnership");
     Route::put("/update-code", "updateAffiliateCode");
+
+    Route::get("/withdraws", "getWithdraws");
+    Route::get("/withdrawals_info", "getWithdrawalsInfo");
+    Route::post("/request_withdrawal", "requestWithdrawal");
+    Route::post("/withdrawal_method", "withdrawalMethod");
 });

@@ -9,8 +9,9 @@ use App\Models\Partnership;
 use Illuminate\Http\Request;
 use App\Models\PartnershipInvite;
 use App\Http\Controllers\Controller;
-use App\Models\PartnershipWithdraws;
+use App\Models\PartnershipWithdraw;
 use Illuminate\Support\Facades\Auth;
+use DB;
 
 class PartnershipController extends Controller
 {
@@ -258,4 +259,112 @@ class PartnershipController extends Controller
 //             ], 404);
 //         }
 //     }
+
+
+    public function getWithdraws(Request $request) {
+
+        $userId = Auth::user()->id;
+        $request->query->add(['id' => $userId]);
+        $request->validate([
+            'id' => 'required|exists:students,id'
+        ]);
+        
+        // $withdrawals = Auth::user()->partnershipWithdraws()->with('payment')->get();
+        $withdrawals = Auth::user()->partnership_withraws()
+                            ->with('user')
+                            ->where('status', 1)
+                            ->get();
+                            
+        // dd($withdrawals);
+ 
+        if($withdrawals->count()>0){
+            return response()->json([
+                'message' => "Student withdrawals retrieved successfully.",
+                'withdrawals' => $withdrawals
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => "No withdrawals found for this student."
+            ], 404);
+        }
+    }
+
+
+    public function getWithdrawalsInfo(Request $request) {
+
+        $userId = Auth::user()->id;
+        $request->query->add(['id' => $userId]);
+        $request->validate([
+            'id' => 'required|exists:students,id'
+        ]);
+        
+        $total_commision = Auth::user()->commision()
+                        ->where('status', 'paid')
+                        // ->select(DB::raw('(price * commission_percentage) as commission_amount'))
+                        ->sum(DB::raw('(price * commission_percentage)'));
+                        // ->get()
+                        // ->toArray();
+        $paid_commision = Auth::user()->partnership_withraws()
+                        ->where('commission_status', 2)
+                        ->sum('withdraw_amount');
+                        // ->get()
+                        // ->toArray();
+
+        $current_balance = $total_commision - $paid_commision;
+        
+        // dd($total_commision, $paid_commision, $current_balance);
+ 
+        return response()->json([
+            'message' => "Withdrawals info retrieved successfully.",
+            'total_commision' => $total_commision,
+            'paid_commision' => $paid_commision,
+            'current_balance' => $current_balance,
+        ], 200);
+    }
+
+    public function requestWithdrawal(Request $request) {
+
+        $userId = Auth::user()->id;
+        // $request->query->add(['id' => $userId]);
+        // $request->validate([
+        //     'id' => 'required|exists:students,id'
+        // ]);
+
+        $pending = PartnershipWithdraw::where('student_id', $userId)
+                        ->where('commission_status', 1)
+                        ->get();
+                        
+        // dd(!$pending->isEmpty(), $pending);
+
+        if(!$pending->isEmpty()){
+            return response()->json([
+                'message' => "already has pending request.",
+            ], 400);
+        }
+
+        $newWithdraw = new PartnershipWithdraw;
+        $newWithdraw->student_id = $userId;
+        
+        $newWithdraw->save();
+ 
+        return response()->json([
+            'message' => "Withdrawal request sent successfully.",
+        ], 200);
+    }
+
+    public function withdrawalMethod(Request $request) {
+        
+        $userId = Auth::user()->id;
+
+        $request->validate([
+            'details' => 'required|string'
+        ]);
+        
+        $paymen_method = Partnership::where("student_id", $userId)->update(["withdraw_method" => $request->details]);
+ 
+        return response()->json([
+            'message' => "Withdrawal method update successfully.",
+        ], 200);
+
+    }
 }
