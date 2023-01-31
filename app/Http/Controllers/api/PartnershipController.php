@@ -172,6 +172,7 @@ class PartnershipController extends Controller
         }
 
         $affiliatePayments = Payment::where('affiliate_code', $partnership->affiliate_code)
+            ->where('from_student_id', $partnership->student_id)
             ->select('commission_status', 'price', 'email', 'created_at', 'commission_percentage')
             ->get();
 
