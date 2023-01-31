@@ -341,7 +341,7 @@ class PartnershipController extends Controller
         } else {
             return response()->json([
                 'message' => "No withdrawals found for this student."
-            ], 404);
+            ], 204);
         }
     }
 
