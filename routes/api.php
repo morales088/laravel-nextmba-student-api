@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\PartnershipController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,4 +77,20 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
     Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
 
+    Route::get('/affiliate', 'api\PartnershipController@partnershipApplication');
+    Route::post('/invite', "api\PartnershipController@useAffiliateCode");
+
+});
+
+Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
+    Route::post("/apply", "applyPartnership");
+    Route::put("/update-code", "updateAffiliateCode");
+
+    Route::get("/payments", "getAffiliatePayments");
+    Route::post("/withdraw-method", "withdrawMethod");
+
+    Route::get("/withdraws", "getWithdraws");
+    Route::get("/withdrawals_info", "getWithdrawalsInfo");
+    Route::post("/request_withdrawal", "requestWithdrawal");
+    // Route::post("/withdrawal_method", "withdrawalMethod");
 });
