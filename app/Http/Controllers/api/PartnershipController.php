@@ -416,6 +416,7 @@ class PartnershipController extends Controller
                                     $join->on('pw.commission_status', '=', DB::raw(2));
                                 })
                             ->where('p.from_student_id', $userId)
+                            ->where('p.status', 'paid')
                             ->whereNull('pw.id')
                             ->select('p.*', DB::raw('(p.price * p.commission_percentage) as commission'))
                             ->get();
