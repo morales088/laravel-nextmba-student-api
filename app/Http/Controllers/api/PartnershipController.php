@@ -381,10 +381,6 @@ class PartnershipController extends Controller
     public function requestWithdrawal(Request $request) {
 
         $userId = Auth::user()->id;
-        // $request->query->add(['id' => $userId]);
-        // $request->validate([
-        //     'id' => 'required|exists:students,id'
-        // ]);
 
         $pending = PartnershipWithdraw::where('student_id', $userId)
                         ->where('commission_status', 1)
@@ -397,11 +393,55 @@ class PartnershipController extends Controller
                 'message' => "already has pending request.",
             ], 400);
         }
+        
+        // $paid_commision = DB::TABLE('partnership_withdraws as pw')
+        //                     ->leftJoin('withdrawal_payments as wp', 'pw.id', '=', 'wp.withdrawal_id')
+        //                     // ->leftJoin('payments as p', 'p.id', '=', 'wp.payment_id')
+        //                     ->leftJoin('payments as p', function($join)
+        //                         {
+        //                             $join->on('p.id', '=', 'wp.payment_id');
+        //                             $join->on('p.from_student_id', '=', 'pw.student_id');
+        //                         })
+        //                     ->where('pw.commission_status', 2)
+        //                     ->where('pw.student_id', $userId)
+        //                     ->select('wp.*', 'pw.id as pw_id', DB::raw('(p.price * p.commission_percentage) as commission'))
+        //                     ->get();
+
+        $unpaid_commission = DB::TABLE('payments as p')
+                            ->leftJoin('withdrawal_payments as wp', 'wp.payment_id', '=', 'p.id')
+                            ->leftJoin('partnership_withdraws as pw', function($join)
+                                {
+                                    $join->on('wp.withdrawal_id', '=', 'pw.id');
+                                    $join->on('p.from_student_id', '=' ,'pw.student_id');
+                                    $join->on('pw.commission_status', '=', DB::raw(2));
+                                })
+                            ->where('p.from_student_id', $userId)
+                            ->whereNull('pw.id')
+                            ->select('p.*', DB::raw('(p.price * p.commission_percentage) as commission'))
+                            ->get();
+                            
+        $balance = $unpaid_commission->sum('commission');
+
+        // dd($unpaid_commission->sum('commission') - $paid_commision->sum('commission'));
+        // dd($balance, $unpaid_commission);
+        if($balance <= 0){
+            return response()->json([
+                'message' => "You have zero (0) balance.",
+            ], 405);
+        }
 
         $newWithdraw = new PartnershipWithdraw;
         $newWithdraw->student_id = $userId;
-        
+        $newWithdraw->withdraw_amount = $balance;
         $newWithdraw->save();
+        // dd($newWithdraw->id, $balance);
+        
+        foreach ($unpaid_commission as $key => $value) {
+            $withdrawal_payment = new WithdrawalPayment;
+            $withdrawal_payment->withdrawal_id = $newWithdraw->id;
+            $withdrawal_payment->payment_id = $value->id;
+            $withdrawal_payment->save();
+        }
  
         return response()->json([
             'message' => "Withdrawal request sent successfully.",
