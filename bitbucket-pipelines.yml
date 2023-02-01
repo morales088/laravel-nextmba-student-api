@@ -16,7 +16,6 @@ pipelines:
       - step:
           name: Deploy to Production
           deployment: Production
-          trigger: manual
           script:
             - pipe: atlassian/ftp-deploy:0.3.7
               variables:
@@ -38,7 +37,6 @@ pipelines:
       - step:
           name: Deploy to Dev
           deployment: Staging
-          trigger: manual
           script:
             - pipe: atlassian/ftp-deploy:0.3.7
               variables:

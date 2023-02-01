@@ -71,8 +71,10 @@ class libraryController extends Controller
         ]);
         
         $video_library = VideoLibrary::where('id', $id)->first();
+        $files = DB::SELECT("SELECT * FROM library_files where libraryId = $id and status <> 0");
 
-        return response(["video_library" => $video_library], 200);
+        return response(["video_library" => $video_library, 'files' => $files], 200);
+
 
     }
 
