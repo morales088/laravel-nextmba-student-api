@@ -78,7 +78,11 @@ class PartnershipController extends Controller
                 'student_id' => $userId,
                 'affiliate_code' => $affiliate_code,
                 'affiliate_status' => 1, // approved
-                'percentage' => 1, $baseCommission
+                'percentage' => $baseCommission
+            ]);
+
+            $student->update([
+                'affiliate_access' => 1 // update to partner
             ]);
 
             return response()->json([
