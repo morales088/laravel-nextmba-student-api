@@ -443,7 +443,7 @@ class PartnershipController extends Controller
             ], 405);
         }
 
-        $withdraw = DB::transaction(function() use ($request, $userId, $balance) {
+        $withdraw = DB::transaction(function() use ($request, $userId, $balance, $unpaid_commission) {
             $newWithdraw = new PartnershipWithdraw;
             $newWithdraw->student_id = $userId;
             $newWithdraw->withdraw_amount = $balance;
