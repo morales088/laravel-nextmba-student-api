@@ -93,4 +93,5 @@ Route::prefix("/partnership")->controller(PartnershipController::class)->group( 
     Route::get("/withdrawals_info", "getWithdrawalsInfo");
     Route::post("/request_withdrawal", "requestWithdrawal");
     // Route::post("/withdrawal_method", "withdrawalMethod");
+
 });

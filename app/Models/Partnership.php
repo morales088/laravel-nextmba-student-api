@@ -12,7 +12,7 @@ class Partnership extends Model
     use HasFactory;
 
     protected $table = 'partnerships';
-    protected $fillable = ['student_id', 'affiliate_status', 'affiliate_code', 'withdraw_method'];
+    protected $fillable = ['student_id', 'affiliate_status', 'affiliate_code', 'withdraw_method', 'percentage'];
 
     public function student() {
         return $this->belongsTo(Student::class, 'student_id');

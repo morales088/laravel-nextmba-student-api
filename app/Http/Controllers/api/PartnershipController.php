@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PartnershipWithdraw;
 use Illuminate\Support\Facades\Auth;
+use App\Models\WithdrawalPayment;
 
 class PartnershipController extends Controller
 {
@@ -69,10 +70,20 @@ class PartnershipController extends Controller
         
         $student = Student::find($userId);
         $existingPartnership = Partnership::where('student_id', $userId)->first();
+        
         if (!$existingPartnership) {
+            $affiliate_code = bin2hex(random_bytes(5)); // generating temporary unique code
+            $baseCommission = env('baseCommissionPercent');
+            
             $application = Partnership::create([
                 'student_id' => $userId,
-                'affiliate_status' => 0, // pending
+                'affiliate_code' => $affiliate_code,
+                'affiliate_status' => 1, // approved
+                'percentage' => $baseCommission
+            ]);
+
+            $student->update([
+                'affiliate_access' => 1 // update to partner
             ]);
 
             return response()->json([
@@ -170,9 +181,9 @@ class PartnershipController extends Controller
                 'error' => 'No affiliate partnership found for the student.'
             ], 404);
         }
-
-        $affiliatePayments = Payment::where('affiliate_code', $partnership->affiliate_code)
-            ->where('from_student_id', $partnership->student_id)
+        
+        $affiliatePayments = Payment::where('from_student_id', $partnership->student_id)
+            // ->where('affiliate_code', $partnership->affiliate_code)
             ->select('commission_status', 'price', 'email', 'created_at', 'commission_percentage')
             ->get();
 
@@ -191,7 +202,8 @@ class PartnershipController extends Controller
             ];
         }
         return response()->json([
-            'affiliatePayments' => $partnership_payments
+            'affiliatePayments' => $partnership_payments,
+            'commission_percentage' => $partnership->percentage, 
         ]);
     }
 
@@ -431,18 +443,21 @@ class PartnershipController extends Controller
             ], 405);
         }
 
-        $newWithdraw = new PartnershipWithdraw;
-        $newWithdraw->student_id = $userId;
-        $newWithdraw->withdraw_amount = $balance;
-        $newWithdraw->save();
-        // dd($newWithdraw->id, $balance);
-        
-        foreach ($unpaid_commission as $key => $value) {
-            $withdrawal_payment = new WithdrawalPayment;
-            $withdrawal_payment->withdrawal_id = $newWithdraw->id;
-            $withdrawal_payment->payment_id = $value->id;
-            $withdrawal_payment->save();
-        }
+        $withdraw = DB::transaction(function() use ($request, $userId, $balance, $unpaid_commission) {
+            $newWithdraw = new PartnershipWithdraw;
+            $newWithdraw->student_id = $userId;
+            $newWithdraw->withdraw_amount = $balance;
+            $newWithdraw->save();
+            // dd($newWithdraw->id, $balance);
+            
+            foreach ($unpaid_commission as $key => $value) {
+                $withdrawal_payment = new WithdrawalPayment;
+                $withdrawal_payment->withdrawal_id = $newWithdraw->id;
+                $withdrawal_payment->payment_id = $value->id;
+                $withdrawal_payment->save();
+            }
+            return $newWithdraw;
+        });
  
         return response()->json([
             'message' => "Withdrawal request sent successfully.",
