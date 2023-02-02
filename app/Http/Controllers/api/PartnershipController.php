@@ -69,10 +69,16 @@ class PartnershipController extends Controller
         
         $student = Student::find($userId);
         $existingPartnership = Partnership::where('student_id', $userId)->first();
+        
         if (!$existingPartnership) {
+            $affiliate_code = bin2hex(random_bytes(5)); // generating temporary unique code
+            $baseCommission = env('baseCommissionPercent');
+            
             $application = Partnership::create([
                 'student_id' => $userId,
-                'affiliate_status' => 0, // pending
+                'affiliate_code' => $affiliate_code,
+                'affiliate_status' => 1, // approved
+                'percentage' => 1, $baseCommission
             ]);
 
             return response()->json([
