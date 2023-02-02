@@ -180,9 +180,9 @@ class PartnershipController extends Controller
                 'error' => 'No affiliate partnership found for the student.'
             ], 404);
         }
-
-        $affiliatePayments = Payment::where('affiliate_code', $partnership->affiliate_code)
-            ->where('from_student_id', $partnership->student_id)
+        
+        $affiliatePayments = Payment::where('from_student_id', $partnership->student_id)
+            // ->where('affiliate_code', $partnership->affiliate_code)
             ->select('commission_status', 'price', 'email', 'created_at', 'commission_percentage')
             ->get();
 
@@ -201,7 +201,8 @@ class PartnershipController extends Controller
             ];
         }
         return response()->json([
-            'affiliatePayments' => $partnership_payments
+            'affiliatePayments' => $partnership_payments,
+            'commission_percentage' => $partnership->percentage, 
         ]);
     }
 
