@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PartnershipWithdraw;
 use Illuminate\Support\Facades\Auth;
+use App\Models\WithdrawalPayment;
 
 class PartnershipController extends Controller
 {
@@ -442,18 +443,21 @@ class PartnershipController extends Controller
             ], 405);
         }
 
-        $newWithdraw = new PartnershipWithdraw;
-        $newWithdraw->student_id = $userId;
-        $newWithdraw->withdraw_amount = $balance;
-        $newWithdraw->save();
-        // dd($newWithdraw->id, $balance);
-        
-        foreach ($unpaid_commission as $key => $value) {
-            $withdrawal_payment = new WithdrawalPayment;
-            $withdrawal_payment->withdrawal_id = $newWithdraw->id;
-            $withdrawal_payment->payment_id = $value->id;
-            $withdrawal_payment->save();
-        }
+        $withdraw = DB::transaction(function() use ($request, $userId, $balance) {
+            $newWithdraw = new PartnershipWithdraw;
+            $newWithdraw->student_id = $userId;
+            $newWithdraw->withdraw_amount = $balance;
+            $newWithdraw->save();
+            // dd($newWithdraw->id, $balance);
+            
+            foreach ($unpaid_commission as $key => $value) {
+                $withdrawal_payment = new WithdrawalPayment;
+                $withdrawal_payment->withdrawal_id = $newWithdraw->id;
+                $withdrawal_payment->payment_id = $value->id;
+                $withdrawal_payment->save();
+            }
+            return $newWithdraw;
+        });
  
         return response()->json([
             'message' => "Withdrawal request sent successfully.",
