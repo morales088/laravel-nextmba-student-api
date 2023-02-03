@@ -419,24 +419,31 @@ class PartnershipController extends Controller
         //                     ->select('wp.*', 'pw.id as pw_id', DB::raw('(p.price * p.commission_percentage) as commission'))
         //                     ->get();
 
-        $unpaid_commission = DB::TABLE('payments as p')
-                            ->leftJoin('withdrawal_payments as wp', 'wp.payment_id', '=', 'p.id')
-                            ->leftJoin('partnership_withdraws as pw', function($join)
-                                {
-                                    $join->on('wp.withdrawal_id', '=', 'pw.id');
-                                    $join->on('p.from_student_id', '=' ,'pw.student_id');
-                                    $join->on('pw.commission_status', '=', DB::raw(2));
-                                })
-                            ->where('p.from_student_id', $userId)
-                            ->where('p.status', 'paid')
-                            ->whereNull('pw.id')
-                            ->select('p.*', DB::raw('(p.price * p.commission_percentage) as commission'))
-                            ->get();
+        // $unpaid_commission = DB::TABLE('payments as p')
+        //                     ->leftJoin('withdrawal_payments as wp', 'wp.payment_id', '=', 'p.id')
+        //                     ->leftJoin('partnership_withdraws as pw', function($join)
+        //                         {
+        //                             $join->on('wp.withdrawal_id', '=', 'pw.id');
+        //                             $join->on('p.from_student_id', '=' ,'pw.student_id');
+        //                             // $join->on('pw.commission_status', '=', DB::raw(2));
+        //                         })
+        //                     ->where('p.from_student_id', $userId)
+        //                     ->where('p.status', 'paid')
+        //                     ->where('p.commission_status', 0)
+        //                     // ->whereNull('pw.id')
+        //                     ->select('p.*', 'pw.id as CS', DB::raw('(p.price * p.commission_percentage) as commission'))
+        //                     ->get();
+
+        $unpaid_commission = Payment::where('from_student_id', $userId)
+                                ->where('status', 'paid')
+                                ->where('commission_status', 0)
+                                ->select('*', DB::raw('(price * commission_percentage) as commission'))
+                                ->get();
                             
         $balance = $unpaid_commission->sum('commission');
 
         // dd($unpaid_commission->sum('commission') - $paid_commision->sum('commission'));
-        // dd($balance, $unpaid_commission);
+        // dd($balance, $unpaid_commission->toArray());
         if($balance <= 0){
             return response()->json([
                 'message' => "You have zero (0) balance.",
