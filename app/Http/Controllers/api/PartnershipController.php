@@ -73,13 +73,13 @@ class PartnershipController extends Controller
         
         if (!$existingPartnership) {
             $affiliate_code = bin2hex(random_bytes(5)); // generating temporary unique code
-            $baseCommission = env('baseCommissionPercent');
+            $beginnerCommissionPercent = env('beginnerCommissionPercent');
             
             $application = Partnership::create([
                 'student_id' => $userId,
                 'affiliate_code' => $affiliate_code,
                 'affiliate_status' => 1, // approved
-                'percentage' => $baseCommission
+                'percentage' => $beginnerCommissionPercent
             ]);
 
             $student->update([
