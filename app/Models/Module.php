@@ -92,7 +92,7 @@ class Module extends Model
                                         left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
                                         left join courses c on m.courseId = c.id
                                         where m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status not in (1,2) and c.id = $course_id 
+                                        and sm.studentId = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
                                         and date(m.start_date) >= date(s.created_at) order by m.start_date asc");
             
             if($modules){

@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use DB;
+use App\Models\Payment;
+use App\Models\Partnership;
+use App\Models\PartnershipWithdraw;
+use Laravel\Passport\HasApiTokens;
+// use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
-use Laravel\Passport\HasApiTokens;
-use Illuminate\Support\Facades\Storage;
-use DB;
 
 class Student extends Authenticatable
 {
@@ -17,6 +20,27 @@ class Student extends Authenticatable
 
     protected $guarded = ['id'];
     protected $table = 'students';
+
+    public function partnership() {
+        return $this->hasOne(Partnership::class, 'student_id');
+    }
+
+    // public function student() {
+    //   return $this->hasMany(Payment::class, 'student_id');
+    // }
+
+    // public function payments()
+    // {
+    //     return $this->hasMany(Payment::class);
+    // }
+    
+    public function partnership_withraws(){
+        return $this->hasMany(PartnershipWithdraw::class);
+    }
+
+    public function commision(){
+        return $this->hasMany(Payment::class, 'from_student_id');
+    }
 
     // /**
     //  * The attributes that are mass assignable.
