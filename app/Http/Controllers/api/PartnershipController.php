@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PartnershipWithdraw;
 use Illuminate\Support\Facades\Auth;
 use App\Models\WithdrawalPayment;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PartnershipController extends Controller
 {
@@ -169,26 +170,25 @@ class PartnershipController extends Controller
     public function getAffiliatePayments(Request $request) {
 
         $userId = Auth::user()->id;
-        $request->query->add(['id' => $userId]);
-        $request->validate([
-            'id' => 'required|exists:partnerships,student_id'
-        ]);
-
-        $student = Student::findOrFail($request->id);
         $partnership = Partnership::where('student_id', $userId)->first();
+
         if (!$partnership) {
             return response()->json([
                 'error' => 'No affiliate partnership found for the student.'
             ], 404);
         }
+
+        $currentPage = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = $request->query('offset', ($currentPage - 1) * $perPage);
         
         $affiliatePayments = Payment::where('from_student_id', $partnership->student_id)
-            // ->where('affiliate_code', $partnership->affiliate_code)
             ->select('commission_status', 'price', 'email', 'created_at', 'commission_percentage')
+            ->offset($offset)->limit($perPage)
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        $commission_amount = 0;
+        $paymentItems = Payment::where('from_student_id', $partnership->student_id)->count();
         $partnership_payments = [];
 
         foreach ($affiliatePayments as $payment) {
@@ -201,9 +201,15 @@ class PartnershipController extends Controller
                 'created_at' => $payment->created_at->toDateTimeString()
             ];
         }
+
+        $partnershipPayments = new LengthAwarePaginator($partnership_payments, $paymentItems, $perPage, $currentPage, [
+            'path' => $request->url(),
+            'query' => $request->query()
+        ]);
+
         return response()->json([
-            'affiliatePayments' => $partnership_payments,
-            'commission_percentage' => $partnership->percentage, 
+            'affiliatePayments' => $partnershipPayments,
+            'commission_percentage' => $partnership->percentage,
         ]);
     }
 
@@ -348,21 +354,5 @@ class PartnershipController extends Controller
         return response()->json([
             'message' => "Withdrawal request sent successfully.",
         ], 200);
-    }
-
-    public function withdrawalMethod(Request $request) {
-        
-        $userId = Auth::user()->id;
-
-        $request->validate([
-            'details' => 'required|string'
-        ]);
-        
-        $paymen_method = Partnership::where("student_id", $userId)->update(["withdraw_method" => $request->details]);
- 
-        return response()->json([
-            'message' => "Withdrawal method update successfully.",
-        ], 200);
-
     }
 }
