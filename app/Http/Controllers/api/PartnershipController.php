@@ -215,21 +215,19 @@ class PartnershipController extends Controller
 
     public function getWithdraws(Request $request) {
 
+        $perPage = $request->input('per_page', 10);
+
         $userId = Auth::user()->id;
         $request->query->add(['id' => $userId]);
         $request->validate([
             'id' => 'required|exists:students,id'
         ]);
-        
-        // $withdrawals = Auth::user()->partnershipWithdraws()->with('payment')->get();
+
         $withdrawals = Auth::user()->partnership_withraws()
-                            ->with('user')
-                            ->orderBy('created_at', 'DESC')
-                            // ->where('status', 1)
-                            ->get();
+                        ->with('user')
+                        ->orderBy('created_at', 'DESC')
+                        ->paginate($perPage);
                             
-        // dd($withdrawals);
- 
         if($withdrawals->count()>0){
             return response()->json([
                 'message' => "Student withdrawals retrieved successfully.",
