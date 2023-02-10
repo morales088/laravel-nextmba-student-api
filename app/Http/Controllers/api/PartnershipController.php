@@ -215,7 +215,9 @@ class PartnershipController extends Controller
 
     public function getWithdraws(Request $request) {
 
-        $perPage = $request->input('per_page', 10);
+        $currentPage = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = $request->query('offset', ($currentPage - 1) * $perPage);
 
         $userId = Auth::user()->id;
         $request->query->add(['id' => $userId]);
@@ -225,13 +227,21 @@ class PartnershipController extends Controller
 
         $withdrawals = Auth::user()->partnership_withraws()
                         ->with('user')
+                        ->offset($offset)->limit($perPage)
                         ->orderBy('created_at', 'DESC')
-                        ->paginate($perPage);
+                        ->get();
+        
+        $withdrawItems = Auth::user()->partnership_withraws()->count();
+
+        $affiliateWithdraws = new LengthAwarePaginator($withdrawals, $withdrawItems, $perPage, $currentPage, [
+            'path' => $request->url(),
+            'query' => $request->query()
+        ]);
                             
-        if($withdrawals->count()>0){
+        if($affiliateWithdraws->count()>0){
             return response()->json([
                 'message' => "Student withdrawals retrieved successfully.",
-                'withdrawals' => $withdrawals
+                'withdrawals' => $affiliateWithdraws
             ], 200);
         } else {
             return response()->json([
