@@ -45,7 +45,7 @@ class ChatController extends Controller
                                     $request->message_id, 
                                     $now, 
                                     $user->chat_moderator,
-                                    $user->affiliate_access,
+                                    $user->pro_access,
                                     ) )->toOthers();
         // }
 
