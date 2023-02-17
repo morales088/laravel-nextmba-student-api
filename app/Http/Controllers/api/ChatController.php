@@ -26,7 +26,7 @@ class ChatController extends Controller
             // 'message_id' => 'string'
         ]);
 
-        dd($user->toArray());
+        // dd($user->toArray());
 
         // if(!empty($request->is_delete) || $request->is_delete){
 
