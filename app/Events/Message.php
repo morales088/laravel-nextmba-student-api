@@ -25,6 +25,8 @@ class Message implements ShouldBroadcast
         public string $channel,
         public string $message_id,
         public string $date_sent,
+        public string $chat_moderator,
+        public string $affiliate_access,
         
     )
     {
