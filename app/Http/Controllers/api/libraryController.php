@@ -16,6 +16,7 @@ class libraryController extends Controller
         $user = auth('api')->user();
         $currentPage = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+        $type = $request->query('type', 1);
 
         if (empty($request->query('offset'))) {
             $offset = ($currentPage - 1) * $perPage;
@@ -26,11 +27,12 @@ class libraryController extends Controller
         
         // \DB::enableQueryLog();
         $video_libraries = $video_libraries
+                            ->where('type', $type)
                             // ->where('date', '<=', $user->created_at)
-                            ->where(function($query) use($user) {
-                                $query->where('date', '<=', $user->created_at);
-                                $query->orWhere('category', 'additional lecture');
-                            })
+                            // ->where(function($query) use($user) {
+                            //     $query->where('date', '<=', $user->created_at);
+                            //     $query->orWhere('category', 'additional lecture');
+                            // })
                             ->where('status', 1)
                             ->where('broadcast_status', 1)
                             // ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
@@ -46,7 +48,8 @@ class libraryController extends Controller
                                 ->get();
         // dd(\DB::getQueryLog());
         
-        $totalOrder = VideoLibrary::where( function($query) use($user) {
+        $totalOrder = VideoLibrary::where('type', $type)
+                        ->where( function($query) use($user) {
                             $query->where('date', '<=', $user->created_at);
                             $query->orWhere('category', 'additional lecture');
                         })
