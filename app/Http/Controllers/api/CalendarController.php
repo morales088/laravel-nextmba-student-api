@@ -23,7 +23,7 @@ class CalendarController extends Controller
         foreach ($modules as $module) {
             // create new event for each module
             $event = Event::create()
-                ->name(($module->name))
+                ->name($module->name)
                 ->description(strip_tags(urldecode($module->description)))
                 ->startsAt(new \DateTime($module->start_date))
                 ->endsAt(new \DateTime($module->end_date));
