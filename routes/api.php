@@ -80,7 +80,7 @@ Route::prefix("/student")->group( function (){
     Route::get('/affiliate', 'api\PartnershipController@partnershipApplication');
     Route::post('/invite', "api\PartnershipController@useAffiliateCode");
     
-    Route::get('/download-schedule', 'api\CalendarController@downloadSchedule');
+    Route::middleware("auth:api")->get('/download-schedule', 'api\CalendarController@downloadSchedule');
 });
 
 Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
