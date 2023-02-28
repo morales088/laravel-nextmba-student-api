@@ -26,7 +26,7 @@ class ChatController extends Controller
             // 'message_id' => 'string'
         ]);
 
-        // dd($request->all(), !$request->is_delete);
+        // dd($user->toArray());
 
         // if(!empty($request->is_delete) || $request->is_delete){
 
@@ -38,7 +38,15 @@ class ChatController extends Controller
             $message_id = $now->format('YmdHisu');
             $request->query->add(['message_id' => $message_id]);
 
-            broadcast( new Message($request->name, $request->message, $request->channel, $request->message_id, $now) )->toOthers();
+            broadcast( new Message(
+                                    $request->name, 
+                                    $request->message, 
+                                    $request->channel, 
+                                    $request->message_id, 
+                                    $now, 
+                                    $user->chat_moderator,
+                                    $user->pro_access,
+                                    ) )->toOthers();
         // }
 
         // event(new Message($request->name, $request->message, $request->channel) );
