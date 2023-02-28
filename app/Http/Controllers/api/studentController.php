@@ -815,4 +815,25 @@ class studentController extends Controller
         
         return response(["message" => "Concern successfully sent."], 200);
     }
+
+    public function courseProgress(Request $request, $id = 0){
+        $module_per_course = env('MODULE_PER_COURSE');
+        $userId = auth('api')->user()->id;
+
+        $courses = COLLECT(\DB::SELECT("select
+                                        SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+                                        SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+                                        count(sm.id) total_st_modules,
+                                        -- ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
+                                        IF( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules)  >= $module_per_course, 100.00, ROUND( ( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules) / $module_per_course) * 100 ), 0 )) score_percentage
+                                        from courses c
+                                        left join modules m ON m.courseId = c.id
+                                        left join student_modules sm ON m.id = sm.moduleId
+                                        left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+                                        where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 and sm.studentId = $userId and c.id = $id and sc.starting <= m.start_date"))->first();
+
+
+        return response(["course" => $courses], 200);
+
+    }
 }

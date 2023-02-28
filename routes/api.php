@@ -33,6 +33,7 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/courses/all_type", "api\studentController@allCourses");
     Route::middleware("auth:api")->get("/courses/{id?}", "api\studentController@getCourses");
     Route::middleware("auth:api")->get("/courses/by_type/{course_type?}", "api\studentController@getCoursesByType");
+    Route::middleware("auth:api")->get("/course-progress/{course_id?}", "api\studentController@courseProgress");
 
     Route::middleware("auth:api")->put("/module/status", "api\studentController@updateStudentModule");
     Route::middleware("auth:api")->get("/module/{moduleId?}", "api\studentController@getModule");
