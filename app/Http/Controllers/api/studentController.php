@@ -32,7 +32,7 @@ class studentController extends Controller
             'id' => 'numeric|min:1|exists:modules,id',
         ]);
 
-        $student_module = COLLECT(\DB::SELECT("select m.*, sm.remarks student_remarks,
+        $student_module = COLLECT(\DB::SELECT("select distinct m.*, sm.remarks student_remarks,
         (CASE WHEN m.status = 1 THEN 'draft' WHEN m.status = 2 THEN 'published' WHEN m.status = 3 THEN 'archived' END) module_status,
         (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
 		(CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status,
@@ -44,14 +44,12 @@ class studentController extends Controller
         $student_module->description = urldecode($student_module->description);
 
         $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.uid topic_uid, t.description topic_description,
-                                s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
-                                from student_modules sm
-                                left join modules m ON m.id = sm.moduleId
-                                left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
-                                left join topics t ON sm.moduleId = t.moduleId
-                                left join speakers s ON s.id = t.speakerId
-                                where sm.status <> 0 and t.status <> 0 and s.status <> 0 and sc.status <> 0
-                                and sm.moduleId = $moduleId and sm.studentId = $userId");
+                            s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
+                            from modules m
+                            left join topics t ON m.id = t.moduleId
+                            left join speakers s ON s.id = t.speakerId
+                            where t.status <> 0 and s.status <> 0
+                            and m.id = $moduleId");
         
         foreach ($topics as $key => $value) {
             $value->topic_description = urldecode($value->topic_description);
@@ -196,11 +194,11 @@ class studentController extends Controller
         $userId = auth('api')->user()->id;
 
         $live_modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
-        from student_modules sm
-        left join modules m ON m.id = sm.moduleId
-        left join courses c on m.courseId = c.id
-        where m.broadcast_status = 2 and m.status = 2 and m.status <> 0 and sm.status <> 0 and c.status <> 0 and
-        sm.studentId = $userId");
+                                    from studentcourses sc
+                                    left join courses c on sc.courseId = c.id
+                                    left join modules m ON c.id = m.courseId
+                                    where m.broadcast_status = 2 and m.status = 2 and m.status <> 0 and sc.status <> 0 and c.status <> 0 and
+                                    sc.studentId = $userId");
 
         foreach ($live_modules as $key => $value) {
 
@@ -230,11 +228,11 @@ class studentController extends Controller
         $userId = auth('api')->user()->id;
 
         $upcoming_modules = COLLECT(\DB::SELECT("select m.*, c.name course_name, c.price course_price
-                                        from student_modules sm
-                                        left join modules m ON m.id = sm.moduleId
-                                        left join courses c on m.courseId = c.id
-                                        where m.status <> 0 and sm.status <> 0 and c.status <> 0
-                                        and sm.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and m.start_date > '".now()."'"))->first();
+                                        from studentcourses sc
+                                        left join courses c on sc.courseId = c.id
+                                        left join modules m ON c.id = m.courseId
+                                        where m.status <> 0 and sc.status <> 0 and c.status <> 0
+                                        and sc.studentId = $userId and m.broadcast_status = 1 and m.status = 2 and m.start_date > '".now()."'"))->first();
                                         
         $upcoming_modules->description = urldecode($upcoming_modules->description);
                 //  dd($upcoming_modules);                       
@@ -332,20 +330,20 @@ class studentController extends Controller
         }
 
         $courses = DB::SELECT("select c.*, c.price course_price
-                                from student_modules sm
-                                left join modules m ON m.id = sm.moduleId
-                                left join courses c on m.courseId = c.id
-                                where m. status <> 0 and sm.status <> 0 and c.status <> 0
-                                and sm.studentId = $userId $courseQuery group by c.id");
+                                from studentcourses sc
+                                left join courses c on sc.courseId = c.id
+                                left join modules m ON c.id = m.courseId
+                                where m. status <> 0 and sc.status <> 0 and c.status <> 0
+                                and sc.studentId = $userId $courseQuery group by c.id");
 
         foreach ($courses as $key => $value) {
             $value->description = urldecode($value->description);
 
             $past_module = DB::SELECT("select m.*,
-                                                (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
-                                                from student_modules sm
-                                                left join modules m ON sm.moduleId = m.id
-                                                where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2 and m.broadcast_status in (3,4)  order by m.start_date asc");
+                                        (CASE WHEN sm.status = 1 THEN 'active' WHEN m.status = 2 THEN 'pending' WHEN m.status = 3 THEN 'complete' END) student_module_status
+                                        from student_modules sm
+                                        left join modules m ON sm.moduleId = m.id
+                                        where m.end_date < '".now()."' and sm.studentId = $userId and m.courseId = $value->id and m.status = 2 and m.broadcast_status in (3,4) order by m.start_date asc");
 
             foreach ($past_module as $key1 => $value1) {
                 $value1->description = urldecode($value1->description);
