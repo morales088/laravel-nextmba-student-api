@@ -24,40 +24,31 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
-        sleep(1); // slowdown the request for set seconds
+        
+        sleep(5); // slowdown the request for set seconds
+
         $video_libraries = VideoLibrary::query();
         
-        // \DB::enableQueryLog();
         $video_libraries = $video_libraries
-                            ->where('type', $type)
-                            // ->where('date', '<=', $user->created_at)
-                            // ->where(function($query) use($user) {
-                            //     $query->where('date', '<=', $user->created_at);
-                            //     $query->orWhere('category', 'additional lecture');
-                            // })
-                            ->where('status', 1)
-                            ->where('broadcast_status', 1)
-                            // ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
-                            ->orderBy('category', 'DESC')
-                            ->orderBy('date', 'DESC');
-                            // ->get();
+            ->where('type', $type)
+            ->where('status', 1)
+            ->where('broadcast_status', 1)
+            ->orderBy('category', 'DESC')
+            ->orderBy('date', 'DESC');
                             
-        $video_libraries = $video_libraries->offset($offset)
-                                ->limit($perPage)
-                                // ->orderBy('category', 'ASC')
-                                // ->orderBy('date', 'DESC')
-                                // ->orderBy('name', 'ASC')
-                                ->get();
-        // dd(\DB::getQueryLog());
+        $video_libraries = $video_libraries
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
         
         $totalOrder = VideoLibrary::where('type', $type)
-                        ->where( function($query) use($user) {
-                            $query->where('date', '<=', $user->created_at);
-                            $query->orWhere('category', 'additional lecture');
-                        })
-                        ->where('status', 1)
-                        ->where('broadcast_status', 1)
-                        ->count();
+            ->where( function($query) use($user) {
+                $query->where('date', '<=', $user->created_at);
+                $query->orWhere('category', 'additional lecture');
+            })
+            ->where('status', 1)
+            ->where('broadcast_status', 1)
+            ->count();
         
         $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
             'path' => $request->url(),
