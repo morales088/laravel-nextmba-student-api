@@ -23,6 +23,7 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
+        sleep(1); // slowdown the request for set seconds
         $video_libraries = VideoLibrary::query();
         
         // \DB::enableQueryLog();
