@@ -30,7 +30,7 @@ class PartnershipController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
 
-        sleep(1); // slowdown the request for set seconds
+        sleep(5); // slowdown the request for set seconds
 
         $student = Student::find($userId);
         if ($student->affiliate_access === 0) {
