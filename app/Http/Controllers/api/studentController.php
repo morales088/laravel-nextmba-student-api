@@ -262,6 +262,8 @@ class studentController extends Controller
         $module_per_course = env('MODULE_PER_COURSE');
         $userId = auth('api')->user()->id;
 
+        sleep(1); // slowdown the request for set seconds
+
         if($id){
             // $courses = COLLECT(\DB::SELECT("select c.*,
             //                     ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) completion_percentage
