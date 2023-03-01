@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Validation\Rule;
-use App\Models\VideoLibrary;
 use DB;
+use App\Models\VideoLibrary;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class libraryController extends Controller
 {
@@ -73,12 +74,23 @@ class libraryController extends Controller
         $speaker = $request->validate([
             'id' => 'required|string|exists:video_libraries,id',
         ]);
-        
-        $video_library = VideoLibrary::where('id', $id)->first();
-        $files = DB::SELECT("SELECT * FROM library_files where libraryId = $id and status <> 0");
+
+        sleep(5); // slowdown the request for set seconds
+
+        // cache the response
+        $cache_key = 'video_library_' .$id;
+        $cacheDuration = 30;
+
+        $video_library = Cache::remember($cache_key, $cacheDuration, function () use($id) {
+            return VideoLibrary::where('id', $id)->first();
+        });
+
+        $files = DB::table('library_files')
+            ->where('libraryId', $id)
+            ->where('status', '<>', 0)
+            ->get();
 
         return response(["video_library" => $video_library, 'files' => $files], 200);
-
 
     }
 
