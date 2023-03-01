@@ -15,6 +15,7 @@ use App\Models\Module;
 use App\Models\Student;
 use App\Models\Link;
 use App\Models\Studentsetting;
+use App\Models\Course;
 use Mail;
 use DB;
 
@@ -818,5 +819,55 @@ class studentController extends Controller
         Mail::to($concern_recipient)->send(new Issues($user));
         
         return response(["message" => "Concern successfully sent."], 200);
+    }
+
+    public function courseProgress(Request $request, $id = 0){
+        $module_per_course = env('MODULE_PER_COURSE');
+        $userId = auth('api')->user()->id;
+
+        // $courses = COLLECT(\DB::SELECT("select sc.starting, sc.expirationDate, c.price course_price,
+        //                                 SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+        //                                 SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+        //                                 count(sm.id) total_st_modules,
+        //                                 -- ROUND( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) / count(sm.id)) * 100 ), 0 ) score_percentage
+        //                                 IF( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules)  >= $module_per_course, 100.00, ROUND( ( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules) / $module_per_course) * 100 ), 0 )) score_percentage
+        //                                 from courses c
+        //                                 left join modules m ON m.courseId = c.id
+        //                                 left join student_modules sm ON m.id = sm.moduleId
+        //                                 left join studentcourses sc ON c.id = sc.courseId and sc.studentId = sm.studentId
+        //                                 where c.status <> 0 and m.status = 2 and sm.status <> 0 and sc.status <> 0 
+        //                                 and sm.studentId = $userId and c.id = $id and sc.starting <= m.start_date"))->first();
+
+        $courses = Course::query();
+
+        $courses = $courses->leftJoin('modules as m', 'm.courseId', '=', 'courses.id')
+                            ->leftJoin('student_modules as sm', 'm.id', '=', 'sm.moduleId')
+                            ->leftJoin('studentcourses as sc', function($join)
+                            {
+                                $join->on('courses.id', '=', 'sc.courseId');
+                                $join->on('sc.studentId', '=', 'sm.studentId');
+                            })
+                            ->where('courses.status', '<>', 0)
+                            ->where('m.status', '=', 2)
+                            ->where('sm.status', '<>', 0)
+                            ->where('sc.status', '<>', 0)
+                            ->where('sm.studentId', $userId)
+                            ->where('courses.id', $id)
+                            ->where(DB::raw("DATE(sc.starting)") , '<=', DB::raw("DATE(m.start_date)"));
+                            // ->select('m.*');
+
+        // $modules = $courses->select('m.*')->get();
+                            
+        $stats = $courses->selectRaw("sc.starting, sc.expirationDate,
+                                        SUM(CASE WHEN sm.status = 1 THEN 1 ELSE 0 END) AS `incomple_modules`,
+                                        SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) AS `complete_modules`,
+                                        count(sm.id) total_st_modules,
+                                        IF( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules)  >= $module_per_course, 100.00, ROUND( ( ( (SUM(CASE WHEN sm.status = 3 THEN 1 ELSE 0 END) + sc.completed_modules) / $module_per_course) * 100 ), 0 )) score_percentage");
+
+
+        // dd($stats->first()->toArray());
+
+        return response(["course" => $stats->first()], 200);
+        
     }
 }
