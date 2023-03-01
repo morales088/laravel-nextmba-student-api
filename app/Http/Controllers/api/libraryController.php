@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Validation\Rule;
-use App\Models\VideoLibrary;
 use DB;
+use App\Models\VideoLibrary;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class libraryController extends Controller
 {
@@ -23,39 +24,31 @@ class libraryController extends Controller
         } else {
             $offset = $request->query('offset');
         }
+        
+        sleep(5); // slowdown the request for set seconds
+
         $video_libraries = VideoLibrary::query();
         
-        // \DB::enableQueryLog();
         $video_libraries = $video_libraries
-                            ->where('type', $type)
-                            // ->where('date', '<=', $user->created_at)
-                            // ->where(function($query) use($user) {
-                            //     $query->where('date', '<=', $user->created_at);
-                            //     $query->orWhere('category', 'additional lecture');
-                            // })
-                            ->where('status', 1)
-                            ->where('broadcast_status', 1)
-                            // ->orderByRaw("CASE category WHEN 'additional lecture' THEN 1 ELSE 2 END");
-                            ->orderBy('category', 'DESC')
-                            ->orderBy('date', 'DESC');
-                            // ->get();
+            ->where('type', $type)
+            ->where('status', 1)
+            ->where('broadcast_status', 1)
+            ->orderBy('category', 'DESC')
+            ->orderBy('date', 'DESC');
                             
-        $video_libraries = $video_libraries->offset($offset)
-                                ->limit($perPage)
-                                // ->orderBy('category', 'ASC')
-                                // ->orderBy('date', 'DESC')
-                                // ->orderBy('name', 'ASC')
-                                ->get();
-        // dd(\DB::getQueryLog());
+        $video_libraries = $video_libraries
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
         
         $totalOrder = VideoLibrary::where('type', $type)
-                        ->where( function($query) use($user) {
-                            $query->where('date', '<=', $user->created_at);
-                            $query->orWhere('category', 'additional lecture');
-                        })
-                        ->where('status', 1)
-                        ->where('broadcast_status', 1)
-                        ->count();
+            ->where( function($query) use($user) {
+                $query->where('date', '<=', $user->created_at);
+                $query->orWhere('category', 'additional lecture');
+            })
+            ->where('status', 1)
+            ->where('broadcast_status', 1)
+            ->count();
         
         $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
             'path' => $request->url(),
@@ -72,12 +65,23 @@ class libraryController extends Controller
         $speaker = $request->validate([
             'id' => 'required|string|exists:video_libraries,id',
         ]);
-        
-        $video_library = VideoLibrary::where('id', $id)->first();
-        $files = DB::SELECT("SELECT * FROM library_files where libraryId = $id and status <> 0");
+
+        sleep(5); // slowdown the request for set seconds
+
+        // cache the response
+        $cache_key = 'video_library_' .$id;
+        $cacheDuration = 30;
+
+        $video_library = Cache::remember($cache_key, $cacheDuration, function () use($id) {
+            return VideoLibrary::where('id', $id)->first();
+        });
+
+        $files = DB::table('library_files')
+            ->where('libraryId', $id)
+            ->where('status', '<>', 0)
+            ->get();
 
         return response(["video_library" => $video_library, 'files' => $files], 200);
-
 
     }
 

@@ -38,7 +38,7 @@ class CalendarController extends Controller
         // set the content type to 'text/calendar'
         $headers = array(
             'Content-Type' => 'text/calendar',
-            'Content-Disposition' => 'attactment; filename="schedule.ics"'
+            'Content-Disposition' => 'attachment; filename="schedule.ics"'
         );
 
         return response($iCal, 200 ,$headers);
