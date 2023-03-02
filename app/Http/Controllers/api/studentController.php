@@ -865,6 +865,7 @@ class studentController extends Controller
                             ->where('m.status', '=', 2)
                             ->where('sm.status', '<>', 0)
                             ->where('sc.status', '<>', 0)
+                            ->where('m.pro_access', 0)
                             ->where('sm.studentId', $userId)
                             ->where('courses.id', $id)
                             ->where(DB::raw("DATE(sc.starting)") , '<=', DB::raw("DATE(m.start_date)"));
