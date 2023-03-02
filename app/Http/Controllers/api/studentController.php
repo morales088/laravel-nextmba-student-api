@@ -16,6 +16,7 @@ use App\Models\Student;
 use App\Models\Link;
 use App\Models\Studentsetting;
 use App\Models\Course;
+use App\Models\StudentModule;
 use Mail;
 use DB;
 
@@ -491,11 +492,24 @@ class studentController extends Controller
         $request->validate([
             'module_id' => 'required|numeric|min:1|exists:modules,id',
         ]);
+        
+        $studentModule = StudentModule::where("studentId", $userId)
+        ->where("moduleId", $request->module_id)
+        // ->where("status", '<>', 0)
+        ->first();
 
-        DB::table('student_modules')
-                        ->where('studentId', $userId)
-                        ->where('moduleId', $request->module_id)
-                        ->update(['status' => '3', 'updated_at' => now()]);
+        if($studentModule){
+            DB::table('student_modules')
+                            ->where('studentId', $userId)
+                            ->where('moduleId', $request->module_id)
+                            ->update(['status' => '3', 'updated_at' => now()]);
+        }else{
+            $newStudentModule = new StudentModule;
+            $newStudentModule->studentId = $userId;
+            $newStudentModule->moduleId = $request->module_id;
+            $newStudentModule->status = 3;
+            $newStudentModule->save();
+        }
 
         return response(["message" => "successfully updated student module's status"], 200);
     }
