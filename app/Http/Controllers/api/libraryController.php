@@ -31,6 +31,7 @@ class libraryController extends Controller
         
         $video_libraries = $video_libraries
             ->where('type', $type)
+            ->where('date', '<=', $user->created_at)
             ->where('status', 1)
             ->where('broadcast_status', 1)
             ->orderBy('category', 'DESC')
