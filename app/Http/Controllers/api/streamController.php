@@ -27,6 +27,16 @@ class streamController extends Controller
         ]);
 
         $cf_response_result = $response->json()['result'];
+        // dd($cf_response_result['thumbnailTimestampPct'] == 0, $cf_response_result['thumbnailTimestampPct']);
+        if($cf_response_result['thumbnailTimestampPct'] == 0){
+
+            $response_thumbnail = Http::acceptJson()->withHeaders([
+                'Authorization' => "Bearer $stream_api_key",
+            ])->post($stream_link."/accounts/$stream_account_id/stream/$request->uid", [
+                'thumbnailTimestampPct' => 0.1,
+            ]);
+
+        }
 
         $time = now()->addHours(3);
 
