@@ -56,7 +56,7 @@ class Module extends Model
 
                     $value->topics = $topics;
 
-                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->get();
+                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
                 }
 
             }
@@ -101,7 +101,7 @@ class Module extends Model
 
                     $value->topics = $topics;
 
-                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->get();
+                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
                 }
             }
             
@@ -147,7 +147,7 @@ class Module extends Model
 
                     $value->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $value->id and status <> 0");
 
-                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->get();
+                    $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
                 }
             }
         }
