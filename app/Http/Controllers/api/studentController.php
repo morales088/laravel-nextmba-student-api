@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use App\Mail\ForgotPassword;
-use App\Mail\AccountUpdate;
-use App\Mail\ChangeEmail;
+use DB;
+use Mail;
 use App\Mail\Issues;
+use App\Models\Link;
+use App\Models\Course;
 use App\Models\Module;
 use App\Models\Student;
-use App\Models\Link;
+use App\Models\Category;
+use App\Mail\ChangeEmail;
+use App\Mail\AccountUpdate;
+use App\Mail\ForgotPassword;
+use Illuminate\Http\Request;
+use App\Models\StudentModule;
 use App\Models\Studentsetting;
-use App\Models\Course;
-use Mail;
-use DB;
+use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 
 class studentController extends Controller
@@ -58,6 +60,10 @@ class studentController extends Controller
         }
 
         $student_module->topics = $topics;
+
+        $category = Category::where('status', '<>', 0)->where('id', $student_module->category_id)->get();
+        
+        $student_module->category = $category;
 
         $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
 
@@ -491,11 +497,24 @@ class studentController extends Controller
         $request->validate([
             'module_id' => 'required|numeric|min:1|exists:modules,id',
         ]);
+        
+        $studentModule = StudentModule::where("studentId", $userId)
+        ->where("moduleId", $request->module_id)
+        // ->where("status", '<>', 0)
+        ->first();
 
-        DB::table('student_modules')
-                        ->where('studentId', $userId)
-                        ->where('moduleId', $request->module_id)
-                        ->update(['status' => '3', 'updated_at' => now()]);
+        if($studentModule){
+            DB::table('student_modules')
+                            ->where('studentId', $userId)
+                            ->where('moduleId', $request->module_id)
+                            ->update(['status' => '3', 'updated_at' => now()]);
+        }else{
+            $newStudentModule = new StudentModule;
+            $newStudentModule->studentId = $userId;
+            $newStudentModule->moduleId = $request->module_id;
+            $newStudentModule->status = 3;
+            $newStudentModule->save();
+        }
 
         return response(["message" => "successfully updated student module's status"], 200);
     }
@@ -851,6 +870,7 @@ class studentController extends Controller
                             ->where('m.status', '=', 2)
                             ->where('sm.status', '<>', 0)
                             ->where('sc.status', '<>', 0)
+                            ->where('m.pro_access', 0)
                             ->where('sm.studentId', $userId)
                             ->where('courses.id', $id)
                             ->where(DB::raw("DATE(sc.starting)") , '<=', DB::raw("DATE(m.start_date)"));

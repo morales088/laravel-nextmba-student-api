@@ -35,9 +35,14 @@ class libraryController extends Controller
             
             $video_libraries = VideoLibrary::query();
         
+            if($type == 1){
+                $video_libraries = $video_libraries
+                    ->where('date', '<=', $user->created_at);
+            }
+            
             $video_libraries = $video_libraries
+                // ->where('date', '<=', $user->created_at)
                 ->where('type', $type)
-                ->where('date', '<=', $user->created_at)
                 ->where('status', 1)
                 ->where('broadcast_status', 1)
                 ->orderBy('category', 'DESC')
@@ -57,7 +62,7 @@ class libraryController extends Controller
                 ->where('broadcast_status', 1)
                 ->count();
             
-            return new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
+            $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
                 'path' => $request->url(),
                 'query' => $request->query(),
             ]);
