@@ -62,7 +62,7 @@ class libraryController extends Controller
                 ->where('broadcast_status', 1)
                 ->count();
             
-            $videos = new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
+            return new LengthAwarePaginator($video_libraries, $totalOrder, $perPage, $currentPage, [
                 'path' => $request->url(),
                 'query' => $request->query(),
             ]);
