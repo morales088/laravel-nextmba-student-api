@@ -263,7 +263,7 @@ class studentController extends Controller
         $module_per_course = env('MODULE_PER_COURSE');
         $userId = auth('api')->user()->id;
 
-        sleep(5); // slowdown the request for set seconds
+        sleep(1); // slowdown the request for set seconds
 
         if($id){
             // $courses = COLLECT(\DB::SELECT("select c.*,
@@ -724,7 +724,7 @@ class studentController extends Controller
 
         $userId = auth('api')->user()->id;
 
-        sleep(5); // slowdown the request for set seconds
+        sleep(1); // slowdown the request for set seconds
         
         $active = DB::SELECT("select *                                
                                     from
