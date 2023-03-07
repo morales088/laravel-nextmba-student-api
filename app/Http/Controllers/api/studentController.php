@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use App\Mail\ForgotPassword;
-use App\Mail\AccountUpdate;
-use App\Mail\ChangeEmail;
+use DB;
+use Mail;
 use App\Mail\Issues;
+use App\Models\Link;
+use App\Models\Course;
 use App\Models\Module;
 use App\Models\Student;
-use App\Models\Link;
-use App\Models\Studentsetting;
-use App\Models\Course;
+use App\Models\Category;
+use App\Mail\ChangeEmail;
+use App\Mail\AccountUpdate;
+use App\Mail\ForgotPassword;
+use Illuminate\Http\Request;
 use App\Models\StudentModule;
-use Mail;
-use DB;
+use App\Models\Studentsetting;
+use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 
 class studentController extends Controller
@@ -59,6 +60,10 @@ class studentController extends Controller
         }
 
         $student_module->topics = $topics;
+
+        $category = Category::where('status', '<>', 0)->where('id', $student_module->category_id)->get();
+        
+        $student_module->category = $category;
 
         $student_module->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $moduleId and status <> 0");
 
@@ -264,7 +269,7 @@ class studentController extends Controller
         $module_per_course = env('MODULE_PER_COURSE');
         $userId = auth('api')->user()->id;
 
-        sleep(5); // slowdown the request for set seconds
+        sleep(1); // slowdown the request for set seconds
 
         if($id){
             // $courses = COLLECT(\DB::SELECT("select c.*,
@@ -738,7 +743,7 @@ class studentController extends Controller
 
         $userId = auth('api')->user()->id;
 
-        sleep(5); // slowdown the request for set seconds
+        sleep(1); // slowdown the request for set seconds
         
         $active = DB::SELECT("select *                                
                                     from
