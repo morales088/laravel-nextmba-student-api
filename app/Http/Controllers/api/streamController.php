@@ -21,11 +21,11 @@ class streamController extends Controller
         ]);
         
 
-        $response_thumbnail = Http::acceptJson()->withHeaders([
-            'Authorization' => "Bearer $stream_api_key",
-        ])->post($stream_link."/accounts/$stream_account_id/stream/$request->uid", [
-            'thumbnailTimestampPct' => 0.1,
-        ]);
+        // $response_thumbnail = Http::acceptJson()->withHeaders([
+        //     'Authorization' => "Bearer $stream_api_key",
+        // ])->post($stream_link."/accounts/$stream_account_id/stream/$request->uid", [
+        //     'thumbnailTimestampPct' => 0.1,
+        // ]);
 
         $response = Http::acceptJson()->withHeaders([
             'Authorization' => "Bearer $stream_api_key",
