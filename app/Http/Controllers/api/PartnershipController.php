@@ -8,11 +8,12 @@ use App\Models\Student;
 use App\Models\Partnership;
 use Illuminate\Http\Request;
 use App\Models\PartnershipInvite;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use App\Models\PartnershipWithdraw;
-use Illuminate\Support\Facades\Auth;
 use App\Models\WithdrawalPayment;
+use Illuminate\Support\Facades\DB;
+use App\Models\PartnershipWithdraw;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class PartnershipController extends Controller
@@ -30,9 +31,15 @@ class PartnershipController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
 
-        sleep(5); // slowdown the request for set seconds
+        $cache_key = 'student_'.$userId;
+        $cacheDuration = 60;
+        
+        $student = Cache::remember($cache_key, $cacheDuration, function () use($userId) {
+            return Student::find($userId);
+        });
+        
+        sleep(1); // slowdown the request for set seconds
 
-        $student = Student::find($userId);
         if ($student->affiliate_access === 0) {
             $existingPartnership = Partnership::where('student_id', $userId)->first();
             if (!$existingPartnership) {
@@ -55,7 +62,16 @@ class PartnershipController extends Controller
                     'message' => "Student already has a approved partnership.",
                 ], 200);
             }
+            
         } else {
+
+            if (Cache::has('partnership_'.$userId)) {
+                $partnership = Cache::get('partnership'.$userId);
+            } else {
+                $partnership = $student->partnership;
+                Cache::put('partnership'.$userId, $partnership, 60);
+            }
+
             return response()->json([
                 'message' => "Student partnership retrieved successfully.",
                 'partnership' => $student->partnership
