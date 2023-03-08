@@ -38,7 +38,7 @@ class PartnershipController extends Controller
             return Student::find($userId);
         });
         
-        sleep(1); // slowdown the request for set seconds
+        // sleep(1); // slowdown the request for set seconds
 
         if ($student->affiliate_access === 0) {
             $existingPartnership = Partnership::where('student_id', $userId)->first();
