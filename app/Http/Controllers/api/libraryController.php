@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class libraryController extends Controller
@@ -31,7 +32,7 @@ class libraryController extends Controller
 
         $videos = Cache::remember($cache_key, $cacheDuration, function() use($user, $currentPage, $perPage, $type, $offset, $request) {
             
-            sleep(1); // slowdown the request for set seconds
+            // sleep(1); // slowdown the request for set seconds
             
             $video_libraries = VideoLibrary::query();
         
@@ -78,7 +79,7 @@ class libraryController extends Controller
             'id' => 'required|string|exists:video_libraries,id',
         ]);
 
-        sleep(1); // slowdown the request for set seconds
+        // sleep(1); // slowdown the request for set seconds
 
         // cache the response
         $cache_key = 'video_library_' .$id;
