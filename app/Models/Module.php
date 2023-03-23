@@ -40,7 +40,7 @@ class Module extends Model
 
                     $value->description = urldecode($value->description);
 
-                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
                     sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                     from topics t
@@ -85,7 +85,7 @@ class Module extends Model
                 foreach ($modules as $key => $value) {
                     $value->description = urldecode($value->description);
 
-                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
                                                     sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                                                     from topics t
@@ -123,13 +123,13 @@ class Module extends Model
                                             left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
                                             where m.status = 2 and c.status <> 0 and sc.status <> 0
                                             and s.id = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
-                                            and date(m.start_date) >= date(s.created_at) order by m.start_date asc");
+                                            and date(m.start_date) >= date(s.course_date) order by m.start_date asc");
             
             if($modules){
                 foreach ($modules as $key => $value) {
                     $value->description = urldecode($value->description);
 
-                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                    $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
                                         sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
                                         (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                                         from topics t
