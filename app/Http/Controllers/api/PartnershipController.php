@@ -31,14 +31,16 @@ class PartnershipController extends Controller
             'id' => 'numeric|min:1|exists:students,id',
         ]);
 
-        $cache_key = 'student_'.$userId;
-        $cacheDuration = 60;
+        // $cache_key = 'student_'.$userId;
+        // $cacheDuration = 60;
         
-        $student = Cache::remember($cache_key, $cacheDuration, function () use($userId) {
-            return Student::find($userId);
-        });
+        // $student = Cache::remember($cache_key, $cacheDuration, function () use($userId) {
+        //     return Student::find($userId);
+        // });
         
         // sleep(1); // slowdown the request for set seconds
+
+        $student = Student::find($userId);
 
         if ($student->affiliate_access === 0) {
             $existingPartnership = Partnership::where('student_id', $userId)->first();
@@ -65,12 +67,12 @@ class PartnershipController extends Controller
             
         } else {
 
-            if (Cache::has('partnership_'.$userId)) {
-                $partnership = Cache::get('partnership'.$userId);
-            } else {
-                $partnership = $student->partnership;
-                Cache::put('partnership'.$userId, $partnership, 60);
-            }
+            // if (Cache::has('partnership_'.$userId)) {
+            //     $partnership = Cache::get('partnership'.$userId);
+            // } else {
+            //     $partnership = $student->partnership;
+            //     Cache::put('partnership'.$userId, $partnership, 60);
+            // }
 
             return response()->json([
                 'message' => "Student partnership retrieved successfully.",
