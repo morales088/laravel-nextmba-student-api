@@ -35,16 +35,23 @@ class studentController extends Controller
             'id' => 'numeric|min:1|exists:modules,id',
         ]);
 
-        $student_module = COLLECT(\DB::SELECT("select distinct m.*, sm.remarks student_remarks,
-        (CASE WHEN m.status = 1 THEN 'draft' WHEN m.status = 2 THEN 'published' WHEN m.status = 3 THEN 'archived' END) module_status,
-        (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
-		(CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status,
-        m.stream_info, m.stream_json, m.uid, m.srt_url
-        from modules m
-        left join student_modules sm ON m.id = sm.moduleId
-        where sm.status <> 0 and m.status <> 0 and m.id = $moduleId and sm.studentId = $userId"))->first();
+        $student_module = COLLECT(\DB::SELECT("select distinct m.*, -- sm.remarks student_remarks,
+            (CASE WHEN m.status = 1 THEN 'draft' WHEN m.status = 2 THEN 'published' WHEN m.status = 3 THEN 'archived' END) module_status,
+            (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
+            -- (CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status,
+            m.stream_info, m.stream_json, m.uid, m.srt_url
+            from modules m
+            left join student_modules sm ON m.id = sm.moduleId
+            where sm.status <> 0 and m.status <> 0 and m.id = $moduleId"))->first();
+
+        $module = COLLECT(\DB::SELECT("select sm.remarks student_remarks,
+                (CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status
+                from student_modules sm
+                where sm.status <> 0 and sm.studentId = $userId and sm.moduleId = $moduleId"))->first();
+        // dd($module ? urldecode($module->description) : 1);
         
-        $student_module->description = urldecode($student_module->description);
+        $student_module->description = $module ? urldecode($module->description) : null;
+        $student_module->student_remarks = $module ? urldecode($module->student_remarks) : null;
 
         $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.uid topic_uid, t.description topic_description,
                             s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
