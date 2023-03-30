@@ -50,8 +50,10 @@ class studentController extends Controller
                 where sm.status <> 0 and sm.studentId = $userId and sm.moduleId = $moduleId"))->first();
         // dd($module ? urldecode($module->description) : 1);
         
-        $student_module->description = $module ? urldecode($module->description) : null;
-        $student_module->student_remarks = $module ? urldecode($module->student_remarks) : null;
+        $student_module->description = urldecode($student_module->description);
+
+        $student_module->student_module_status = $module ? $module->student_module_status : null;
+        $student_module->student_remarks = $module ? $module->student_remarks : null;
 
         $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.uid topic_uid, t.description topic_description,
                             s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
