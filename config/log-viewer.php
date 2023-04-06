@@ -71,7 +71,7 @@ return [
     */
 
     'middleware' => [
-        'web',
+        'api',
         \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
     ],
 
@@ -104,14 +104,14 @@ return [
             'name' => ucfirst(env('APP_ENV', 'local')),
         ],
 
-        // 'staging' => [
-        //     'name' => 'Staging',
-        //     'host' => 'https://staging.example.com/log-viewer',
-        //     'auth' => [      // Example of HTTP Basic auth
-        //         'username' => 'username',
-        //         'password' => 'password',
-        //     ],
-        // ],
+        'staging' => [
+            'name' => 'Staging',
+            'host' => ucfirst(env('APP_URL', ''). '/log-viewer'),
+            // 'auth' => [      // Example of HTTP Basic auth
+            //     'username' => 'username',
+            //     'password' => 'password',
+            // ],
+        ],
         //
         // 'production' => [
         //     'name' => 'Production',
