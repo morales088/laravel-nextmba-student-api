@@ -312,6 +312,9 @@ class giftController extends Controller
             $data = ['studentId' => $student_id, 'courseId' => $request->course_id, 'qty' => 1];
             Studentcourse::insertStudentCourse($data);
 
+            // set student to basic account type
+            Student::studentBasicAccount($student_id);
+
             // deduct course to student_course table
                 // DB::table('studentcourses')
                 // ->where('id', $check_available_qty->id)

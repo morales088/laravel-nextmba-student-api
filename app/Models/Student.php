@@ -24,15 +24,6 @@ class Student extends Authenticatable
     public function partnership() {
         return $this->hasOne(Partnership::class, 'student_id');
     }
-
-    // public function student() {
-    //   return $this->hasMany(Payment::class, 'student_id');
-    // }
-
-    // public function payments()
-    // {
-    //     return $this->hasMany(Payment::class);
-    // }
     
     public function partnership_withraws(){
         return $this->hasMany(PartnershipWithdraw::class);
@@ -42,35 +33,49 @@ class Student extends Authenticatable
         return $this->hasMany(Payment::class, 'from_student_id');
     }
 
-    // /**
-    //  * The attributes that are mass assignable.
-    //  *
-    //  * @var array<int, string>
-    //  */
-    // protected $fillable = [
-    //     'name',
-    //     'email',
-    //     'password',
-    // ];
+  // /**
+  //  * The attributes that are mass assignable.
+  //  *
+  //  * @var array<int, string>
+  //  */
+  // protected $fillable = [
+  //     'name',
+  //     'email',
+  //     'password',
+  // ];
 
-    // /**
-    //  * The attributes that should be hidden for serialization.
-    //  *
-    //  * @var array<int, string>
-    //  */
-    // protected $hidden = [
-    //     'password',
-    //     'remember_token',
-    // ];
+  // /**
+  //  * The attributes that should be hidden for serialization.
+  //  *
+  //  * @var array<int, string>
+  //  */
+  // protected $hidden = [
+  //     'password',
+  //     'remember_token',
+  // ];
 
-    // /**
-    //  * The attributes that should be cast.
-    //  *
-    //  * @var array<string, string>
-    //  */
-    // protected $casts = [
-    //     'email_verified_at' => 'datetime',
-    // ];
+  // /**
+  //  * The attributes that should be cast.
+  //  *
+  //  * @var array<string, string>
+  //  */
+  // protected $casts = [
+  //     'email_verified_at' => 'datetime',
+  // ];
+
+  public static function studentBasicAccount($student_id)
+  {
+
+    $student = Student::find($student_id);
+
+    $student->update([
+        'account_type' => 2,
+        'module_count' => 24,
+        'updated_at' => now(),
+    ]);
+
+    return $student;
+  }
     
     public static function generate_password($length = 8){
       $chars =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
