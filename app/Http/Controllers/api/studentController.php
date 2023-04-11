@@ -14,7 +14,7 @@ use App\Mail\ChangeEmail;
 use App\Mail\AccountUpdate;
 use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
-use App\Models\Studentmodule;
+use App\Models\StudentModule;
 use App\Models\Studentsetting;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
@@ -507,7 +507,7 @@ class studentController extends Controller
             'module_id' => 'required|numeric|min:1|exists:modules,id',
         ]);
         
-        $studentModule = Studentmodule::where("studentId", $userId)
+        $studentModule = StudentModule::where("studentId", $userId)
         ->where("moduleId", $request->module_id)
         // ->where("status", '<>', 0)
         ->first();
@@ -518,7 +518,7 @@ class studentController extends Controller
                             ->where('moduleId', $request->module_id)
                             ->update(['status' => '3', 'updated_at' => now()]);
         }else{
-            $newStudentModule = new Studentmodule;
+            $newStudentModule = new StudentModule;
             $newStudentModule->studentId = $userId;
             $newStudentModule->moduleId = $request->module_id;
             $newStudentModule->status = 3;
@@ -807,7 +807,7 @@ class studentController extends Controller
                                             left join studentcourses sc ON c.id = sc.courseId
                                             left join modules m ON m.courseId = c.id
                                             left join student_modules sm ON m.id = sm.moduleId and sc.studentId = sm.studentId
-                                            where c.status <> 0 and m.status <> 0 and sm.status <> 0 and sc.studentId = $userId and c.id = $value->id and sc.starting <= m.start_date"))->first();
+                                            where c.status <> 0 and m.status <> 0 and sc.status <> 0 and sc.studentId = $userId and c.id = $value->id and sc.starting <= m.start_date"))->first();
                                             // dd($check);
             if($check){
                 $value->starting = $check->starting;
