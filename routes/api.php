@@ -38,6 +38,7 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->put("/module/status", "api\studentController@updateStudentModule");
     Route::middleware("auth:api")->get("/module/{moduleId?}", "api\studentController@getModule");
     Route::middleware("auth:api")->get("/modules/by_type/{course_id}/{module_type?}", "api\studentController@getModulesByType");
+    Route::middleware("auth:api")->get("/modules/all", "api\studentController@getAllModule");
     
     Route::middleware("auth:api")->get("/modules/past/{course_id?}", "api\studentController@getuPastModules");
     Route::middleware("auth:api")->get("/modules/live", "api\studentController@getLiveModules");

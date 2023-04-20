@@ -77,7 +77,7 @@ class Module extends Model
                                             left join studentcourses sc ON sc.studentId = s.id
                                             left join courses c on c.id = sc.courseId
                                             left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
-                                            where m. status <> 0 and c.status <> 0 and sc.status <> 0
+                                            where m.status <> 0 and c.status <> 0 and sc.status <> 0
                                             and s.id = $userId and m.broadcast_status in (1) and m.status = 2 
                                             and c.id = $course_id and m.end_date > '".now()."' order by m.start_date asc");
 
