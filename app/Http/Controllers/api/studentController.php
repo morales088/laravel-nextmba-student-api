@@ -14,7 +14,7 @@ use App\Mail\ChangeEmail;
 use App\Mail\AccountUpdate;
 use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
-use App\Models\StudentModule;
+use App\Models\Studentmodule;
 use App\Models\Studentsetting;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
@@ -507,7 +507,7 @@ class studentController extends Controller
             'module_id' => 'required|numeric|min:1|exists:modules,id',
         ]);
         
-        $studentModule = StudentModule::where("studentId", $userId)
+        $studentModule = Studentmodule::where("studentId", $userId)
         ->where("moduleId", $request->module_id)
         // ->where("status", '<>', 0)
         ->first();
@@ -518,7 +518,7 @@ class studentController extends Controller
                             ->where('moduleId', $request->module_id)
                             ->update(['status' => '3', 'updated_at' => now()]);
         }else{
-            $newStudentModule = new StudentModule;
+            $newStudentModule = new Studentmodule;
             $newStudentModule->studentId = $userId;
             $newStudentModule->moduleId = $request->module_id;
             $newStudentModule->status = 3;
