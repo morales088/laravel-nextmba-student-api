@@ -957,6 +957,32 @@ class studentController extends Controller
                     ->where('m.end_date', '>', now())
                     ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.id IN ($courses), true, false ) has_access"))
                     ->get();
+
+        if($modules){
+            foreach ($modules as $key => $value) {
+                $value->description = urldecode($value->description);
+
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
+                                    sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
+                                    (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                                    from topics t
+                                    left join speaker_roles sr ON t.id = sr.topicId
+                                    left join speakers s on t.speakerId = s.id
+                                    where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                                    and t.moduleId = $value->id");
+                
+                foreach ($topics as $key1 => $value1) {
+                    $value1->topic_description = urldecode($value1->topic_description);
+                    $value1->speaker_description = urldecode($value1->speaker_description);
+                }
+
+                $value->topics = $topics;
+
+                $value->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $value->id and status <> 0");
+
+                $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
+            }
+        }
         
         // dd($modules->toArray());
 
