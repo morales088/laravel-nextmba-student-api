@@ -793,7 +793,7 @@ class studentController extends Controller
         // } 
 
 
-        $all = DB::SELECT("SELECT *, $module_per_course as module_per_course FROM courses c where c.status <> 0");
+        $all = DB::SELECT("SELECT *, $module_per_course as module_per_course FROM courses c where c.is_displayed = 1 and c.status <> 0");
             
         // foreach ($all as $key => $value) {
         //     $value->description = urldecode($value->description);
@@ -837,6 +837,7 @@ class studentController extends Controller
                 $past_module = DB::TABLE("studentcourses as sc")
                                 ->leftJoin("modules as m", "sc.courseId", "=", "m.courseId")
                                 ->where("m.status", 2)
+                                ->where("sc.status", 1)
                                 ->whereIn("m.broadcast_status", [3,4])
                                 ->where("sc.courseId", $value->id)
                                 ->where("sc.studentId", $userId)
@@ -940,6 +941,7 @@ class studentController extends Controller
         $student_courses = DB::TABLE('studentcourses as sc')
                             ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
                             ->where('sc.studentId', $userId)
+                            ->where('c.is_displayed', 1)
                             ->where('sc.status', 1)
                             // ->select('c.name as course_name', 'sc.courseId')
                             // ->get()
