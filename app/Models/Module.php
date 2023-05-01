@@ -41,6 +41,7 @@ class Module extends Model
             $modules = DB::TABLE('courses as c')
                                 ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
                                 // ->where('c.is_displayed', 1)
+                                ->where('c.id', $course_id)
                                 ->where('c.status', '<>', 0)
                                 ->where('m.status', 2)
                                 ->whereIn('m.broadcast_status', [2])
