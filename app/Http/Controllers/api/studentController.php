@@ -826,9 +826,7 @@ class studentController extends Controller
                                 ->where("status", 1)
                                 ->get();
 
-            // dd($student_course, empty($student_course));
-
-            if(empty($student_course)){
+            if($student_course->isEmpty()){
 
                 $value->has_access = 0;
                 $value->past_module = 0;
@@ -843,7 +841,6 @@ class studentController extends Controller
                                 ->where("sc.studentId", $userId)
                                 ->whereRaw("date(m.start_date) >= date(sc.starting)")
                                 ->count();
-                // dd($past_module);
                 
                 $value->past_module_count = $past_module;
                 $value->has_access = 1;
