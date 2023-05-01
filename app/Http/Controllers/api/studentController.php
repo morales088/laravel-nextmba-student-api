@@ -941,10 +941,8 @@ class studentController extends Controller
         $student_courses = DB::TABLE('studentcourses as sc')
                             ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
                             ->where('sc.studentId', $userId)
-                            ->where('c.is_displayed', 1)
+                            // ->where('c.is_displayed', 1)
                             ->where('sc.status', 1)
-                            // ->select('c.name as course_name', 'sc.courseId')
-                            // ->get()
                             ->pluck('sc.courseId')
                             ->toArray();
 
