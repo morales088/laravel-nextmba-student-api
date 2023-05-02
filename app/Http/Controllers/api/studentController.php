@@ -209,34 +209,84 @@ class studentController extends Controller
         
         $userId = auth('api')->user()->id;
 
-        $live_modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
-                                    from studentcourses sc
-                                    left join courses c on sc.courseId = c.id
-                                    left join modules m ON c.id = m.courseId
-                                    where m.broadcast_status = 2 and m.status = 2 and m.status <> 0 and sc.status <> 0 and c.status <> 0 and
-                                    sc.studentId = $userId");
+        // $live_modules = DB::SELECT("select m.*, c.name course_name, c.price course_price
+        //                             from studentcourses sc
+        //                             left join courses c on sc.courseId = c.id
+        //                             left join modules m ON c.id = m.courseId
+        //                             where m.broadcast_status = 2 and m.status = 2 and m.status <> 0 and sc.status <> 0 and c.status <> 0 and
+        //                             sc.studentId = $userId");
 
-        foreach ($live_modules as $key => $value) {
+        // foreach ($live_modules as $key => $value) {
 
-            $value->description = urldecode($value->description);
+        //     $value->description = urldecode($value->description);
 
-            $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
-                            s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
-                            (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
-                            from topics t
-                            left join speaker_roles sr ON t.id = sr.topicId
-                            left join speakers s on t.speakerId = s.id
-                            where t.status <> 0 and sr.status <> 0 and s.status <> 0
-                            and t.moduleId = $value->id");
+        //     $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
+        //                     s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
+        //                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+        //                     from topics t
+        //                     left join speaker_roles sr ON t.id = sr.topicId
+        //                     left join speakers s on t.speakerId = s.id
+        //                     where t.status <> 0 and sr.status <> 0 and s.status <> 0
+        //                     and t.moduleId = $value->id");
 
-            foreach ($topics as $key1 => $value1) {
-                $value1->topic_description = urldecode($value1->topic_description);
-                $value1->speaker_description = urldecode($value1->speaker_description);
+        //     foreach ($topics as $key1 => $value1) {
+        //         $value1->topic_description = urldecode($value1->topic_description);
+        //         $value1->speaker_description = urldecode($value1->speaker_description);
+        //     }
+        //     $value->topics = $topics;
+        // }
+
+        $student_courses = DB::TABLE('studentcourses as sc')
+                                    ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
+                                    ->where('sc.studentId', $userId)
+                                    // ->where('c.is_displayed', 1)
+                                    ->where('sc.status', 1)
+                                    ->pluck('sc.courseId')
+                                    ->toArray();
+
+        // dd($student_courses, implode(',', $student_courses));
+        $courses = implode(',', $student_courses);
+
+        $modules = DB::TABLE('courses as c')
+                            ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
+                            // ->where('c.is_displayed', 1)
+                            ->where('c.status', '<>', 0)
+                            ->where('m.status', 2)
+                            ->whereIn('m.broadcast_status', [2])
+                            // ->where('m.end_date', '>', now())
+                            ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.id IN ($courses), true, false ) has_access"))
+                            ->orderBy('m.start_date', 'asc')
+                            ->get();
+                                    
+        
+        if($modules){
+
+            foreach ($modules as $key => $value) {
+
+                $value->description = urldecode($value->description);
+
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
+                sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
+                (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
+                from topics t
+                left join speaker_roles sr ON t.id = sr.topicId
+                left join speakers s on t.speakerId = s.id
+                where t.status <> 0 and sr.status <> 0 and s.status <> 0
+                and t.moduleId = $value->id");
+
+                foreach ($topics as $key1 => $value1) {
+                    $value1->topic_description = urldecode($value1->topic_description);
+                    $value1->speaker_description = urldecode($value1->speaker_description);
+                }
+
+                $value->topics = $topics;
+
+                $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
             }
-            $value->topics = $topics;
+
         }
 
-        return response(["modules" => $live_modules], 200);
+        return response(["modules" => $modules], 200);
     }
 
     public function getUpcomingModules(Request $request){
