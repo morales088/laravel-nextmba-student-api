@@ -843,7 +843,7 @@ class studentController extends Controller
         // } 
 
 
-        $all = DB::SELECT("SELECT *, $module_per_course as module_per_course FROM courses c where c.is_displayed = 1 and c.status <> 0");
+        $all = DB::SELECT("SELECT *, $module_per_course as module_per_course FROM courses c where c.status <> 0");
             
         // foreach ($all as $key => $value) {
         //     $value->description = urldecode($value->description);
