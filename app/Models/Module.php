@@ -18,20 +18,37 @@ class Module extends Model
         if($modules_type == 'live'){
 
             // $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
-            //                             from student_modules sm
-            //                             left join modules m ON m.id = sm.moduleId
-            //                             left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
-            //                             left join courses c on m.courseId = c.id
-            //                             where m.broadcast_status = 2 and m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0 and 
-            //                             sm.studentId = $userId and c.id = $course_id");
+            //                             from students s
+            //                             left join studentcourses sc ON sc.studentId = s.id
+            //                             left join courses c on c.id = sc.courseId
+            //                             left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
+            //                             where m.broadcast_status = 2 and m.status = 2 and c.status <> 0 and sc.status <> 0 
+            //                             and s.id = $userId and c.id = $course_id");
 
-            $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
-                                        from students s
-                                        left join studentcourses sc ON sc.studentId = s.id
-                                        left join courses c on c.id = sc.courseId
-                                        left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
-                                        where m.broadcast_status = 2 and m.status = 2 and c.status <> 0 and sc.status <> 0 
-                                        and s.id = $userId and c.id = $course_id");
+
+            
+            $student_courses = DB::TABLE('studentcourses as sc')
+                                    ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
+                                    ->where('sc.studentId', $userId)
+                                    // ->where('c.is_displayed', 1)
+                                    ->where('sc.status', 1)
+                                    ->pluck('sc.courseId')
+                                    ->toArray();
+
+            // dd($student_courses, implode(',', $student_courses));
+            $courses = implode(',', $student_courses);
+
+            $modules = DB::TABLE('courses as c')
+                                ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
+                                // ->where('c.is_displayed', 1)
+                                ->where('c.id', $course_id)
+                                ->where('c.status', '<>', 0)
+                                ->where('m.status', 2)
+                                ->whereIn('m.broadcast_status', [2])
+                                // ->where('m.end_date', '>', now())
+                                ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.id IN ($courses), true, false ) has_access"))
+                                ->orderBy('m.start_date', 'asc')
+                                ->get();
                                         
             
             if($modules){
