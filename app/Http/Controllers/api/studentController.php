@@ -254,7 +254,8 @@ class studentController extends Controller
                             ->where('m.status', 2)
                             ->whereIn('m.broadcast_status', [2])
                             // ->where('m.end_date', '>', now())
-                            ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.id IN ($courses), true, false ) has_access"))
+                            ->select('m.*', 'c.name as course_name', 
+                                        DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
                             ->orderBy('m.start_date', 'asc')
                             ->get();
                                     
