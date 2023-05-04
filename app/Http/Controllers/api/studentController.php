@@ -801,6 +801,7 @@ class studentController extends Controller
         $module_per_course = env('MODULE_PER_COURSE');
 
         $userId = auth('api')->user()->id;
+        $userDate = auth('api')->user()->created_at;
 
         // sleep(1); // slowdown the request for set seconds
         
@@ -870,18 +871,31 @@ class studentController extends Controller
         // }
 
         foreach ($all as $key => $value) {
+            
             $student_course = DB::TABLE("studentcourses as sc")
                                 ->where("studentId", $userId)
                                 ->where("courseId", $value->id)
                                 ->where("status", 1)
                                 ->get();
 
-            if($student_course->isEmpty()){
+            if($value->paid == 0){
+
+                $past_module = DB::TABLE("modules as m")
+                                ->where("m.status", 2)
+                                ->whereIn("m.broadcast_status", [3,4])
+                                ->whereRaw("date(m.start_date) >= date('$userDate')")
+                                ->count();
+
+                $value->past_module = 0;
+                $value->has_access = 1;
+
+            }elseif($student_course->isEmpty()){
 
                 $value->has_access = 0;
                 $value->past_module = 0;
 
             }else{
+
                 $past_module = DB::TABLE("studentcourses as sc")
                                 ->leftJoin("modules as m", "sc.courseId", "=", "m.courseId")
                                 ->where("m.status", 2)
