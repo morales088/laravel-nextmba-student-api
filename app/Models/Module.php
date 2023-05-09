@@ -46,7 +46,7 @@ class Module extends Model
                                 ->where('m.status', 2)
                                 ->whereIn('m.broadcast_status', [2])
                                 // ->where('m.end_date', '>', now())
-                                ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.id IN ($courses), true, false ) has_access"))
+                                ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
                                 ->orderBy('m.start_date', 'asc')
                                 ->get();
                                         
@@ -133,14 +133,29 @@ class Module extends Model
             //                             and sm.studentId = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
             //                             and date(m.start_date) >= date(s.created_at) order by m.start_date asc");
 
-            $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
-                                            from students s
-                                            left join studentcourses sc ON sc.studentId = s.id
-                                            left join courses c on c.id = sc.courseId
-                                            left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
-                                            where m.status = 2 and c.status <> 0 and sc.status <> 0
-                                            and s.id = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
-                                            and date(m.start_date) >= date(sc.starting) order by m.start_date asc");
+            $check = Course::where('id', $course_id)->first();
+            $userDate = auth('api')->user()->created_at;
+            // dd($check, $userDate);
+            if($check->paid == 0){
+                $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
+                                        from courses c
+                                        left join modules m ON m.courseId = c.id
+                                        where m.status = 2 and c.status <> 0
+                                        and m.broadcast_status in (3,4) and c.id = $course_id
+                                        and date(m.start_date) >= date('$userDate') order by m.start_date asc");
+
+            }else{
+
+                $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
+                                                from students s
+                                                left join studentcourses sc ON sc.studentId = s.id
+                                                left join courses c on c.id = sc.courseId
+                                                left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
+                                                where m.status = 2 and c.status <> 0 and sc.status <> 0
+                                                and s.id = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
+                                                and date(m.start_date) >= date(sc.starting) order by m.start_date asc");
+                
+            }
             
             if($modules){
                 foreach ($modules as $key => $value) {
