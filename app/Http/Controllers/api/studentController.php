@@ -473,7 +473,7 @@ class studentController extends Controller
 
         }
         
-        $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field') +
+        $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field', 'language') +
                         [ 'updated_at' => now()]
                         );
 
