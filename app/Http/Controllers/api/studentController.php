@@ -16,6 +16,8 @@ use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
 use App\Models\Studentmodule;
 use App\Models\Studentsetting;
+use App\Models\ModuleStream;
+use App\Models\ReplayVideo;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -1052,5 +1054,36 @@ class studentController extends Controller
         // dd($modules->toArray());
 
         return response(["modules" => $modules], 200);
+    }
+
+    public function getModuleStreams(Request $request, $moduleId){
+
+        $request->query->add(['moduleId' => $moduleId]);
+        
+        $request->validate([
+            'moduleId' => 'required|exists:modules,id'
+        ]);
+        // dd($moduleId);
+        $streams = ModuleStream::where('module_id', $moduleId)
+                                ->where('status', 2)
+                                ->whereIn('broadcast_status', [2])
+                                ->get();
+
+        return response(["streams" => $streams], 200);
+    }
+
+    public function getReplay(Request $request, $topicId){
+
+        $request->query->add(['topicId' => $topicId]);
+        
+        $request->validate([
+            'topicId' => 'required|exists:topics,id'
+        ]);
+        // dd($moduleId);
+        $replays = ReplayVideo::where('topic_id', $topicId)
+                                ->where('status', 2)
+                                ->get();
+
+        return response(["replays" => $replays], 200);
     }
 }

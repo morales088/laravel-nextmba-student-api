@@ -30,7 +30,6 @@ class Module extends Model
             $student_courses = DB::TABLE('studentcourses as sc')
                                     ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
                                     ->where('sc.studentId', $userId)
-                                    // ->where('c.is_displayed', 1)
                                     ->where('sc.status', 1)
                                     ->pluck('sc.courseId')
                                     ->toArray();
@@ -40,12 +39,10 @@ class Module extends Model
 
             $modules = DB::TABLE('courses as c')
                                 ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
-                                // ->where('c.is_displayed', 1)
                                 ->where('c.id', $course_id)
                                 ->where('c.status', '<>', 0)
                                 ->where('m.status', 2)
-                                ->whereIn('m.broadcast_status', [2])
-                                // ->where('m.end_date', '>', now())
+                                // ->whereIn('m.broadcast_status', [2])
                                 ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
                                 ->orderBy('m.start_date', 'asc')
                                 ->get();
@@ -95,7 +92,7 @@ class Module extends Model
                                             left join courses c on c.id = sc.courseId
                                             left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
                                             where m.status <> 0 and c.status <> 0 and sc.status <> 0
-                                            and s.id = $userId and m.broadcast_status in (1) and m.status = 2 
+                                            and s.id = $userId and m.status = 2 
                                             and c.id = $course_id and m.end_date > '".now()."' order by m.start_date asc");
 
             if($modules){
@@ -152,7 +149,7 @@ class Module extends Model
                                                 left join courses c on c.id = sc.courseId
                                                 left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
                                                 where m.status = 2 and c.status <> 0 and sc.status <> 0
-                                                and s.id = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
+                                                and s.id = $userId and c.id = $course_id 
                                                 and date(m.start_date) >= date(sc.starting) order by m.start_date asc");
                 
             }
