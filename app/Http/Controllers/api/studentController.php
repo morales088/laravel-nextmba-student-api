@@ -1072,17 +1072,33 @@ class studentController extends Controller
         return response(["streams" => $streams], 200);
     }
 
-    public function getReplay(Request $request, $topicId){
+    public function getReplay(Request $request, $id){
 
-        $request->query->add(['topicId' => $topicId]);
+        // $request->query->add(['topicId' => $topicId]);
         
+        // $request->validate([
+        //     'topicId' => 'required|exists:topics,id'
+        // ]);
+        // // dd($moduleId);
+        // $replays = ReplayVideo::where('topic_id', $topicId)
+        //                         ->where('status', 2)
+        //                         ->get();
+
+        
+        $request->query->add(['module_id' => $id]);
+
         $request->validate([
-            'topicId' => 'required|exists:topics,id'
+            'module_id' => 'required|numeric|min:1|exists:modules,id',
         ]);
-        // dd($moduleId);
-        $replays = ReplayVideo::where('topic_id', $topicId)
-                                ->where('status', 2)
-                                ->get();
+
+        $replays = DB::TABLE('topics as t')
+                        ->leftJoin('replay_videos as rv', 't.id', '=', 'rv.topic_id')
+                        ->where('t.status', 1)
+                        ->where('rv.status', '<>', 0)
+                        ->where('t.moduleId', $id)
+                        ->select('rv.*')
+                        ->orderBy('t.id')
+                        ->get();
 
         return response(["replays" => $replays], 200);
     }
