@@ -149,7 +149,7 @@ class Module extends Model
                                                 left join courses c on c.id = sc.courseId
                                                 left join modules m ON m.courseId = c.id and sc.courseId = m.courseId
                                                 where m.status = 2 and c.status <> 0 and sc.status <> 0
-                                                and m.broadcast_status in (3,4) and s.id = $userId and c.id = $course_id 
+                                                and s.id = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
                                                 and date(m.start_date) >= date(sc.starting) order by m.start_date asc");
                 
             }
