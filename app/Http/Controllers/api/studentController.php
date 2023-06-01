@@ -1065,8 +1065,8 @@ class studentController extends Controller
         ]);
         // dd($moduleId);
         $streams = ModuleStream::where('module_id', $moduleId)
-                                ->where('status', 2)
-                                ->whereIn('broadcast_status', [2])
+                                ->where('status', 3)
+                                // ->whereIn('broadcast_status', [2])
                                 ->get();
 
         return response(["streams" => $streams], 200);
