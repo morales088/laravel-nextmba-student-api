@@ -30,7 +30,6 @@ class Module extends Model
             $student_courses = DB::TABLE('studentcourses as sc')
                                     ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
                                     ->where('sc.studentId', $userId)
-                                    // ->where('c.is_displayed', 1)
                                     ->where('sc.status', 1)
                                     ->pluck('sc.courseId')
                                     ->toArray();
@@ -40,12 +39,10 @@ class Module extends Model
 
             $modules = DB::TABLE('courses as c')
                                 ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
-                                // ->where('c.is_displayed', 1)
                                 ->where('c.id', $course_id)
                                 ->where('c.status', '<>', 0)
                                 ->where('m.status', 2)
                                 ->whereIn('m.broadcast_status', [2])
-                                // ->where('m.end_date', '>', now())
                                 ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
                                 ->orderBy('m.start_date', 'asc')
                                 ->get();

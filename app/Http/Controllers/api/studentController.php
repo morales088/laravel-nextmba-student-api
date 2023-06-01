@@ -16,6 +16,8 @@ use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
 use App\Models\Studentmodule;
 use App\Models\Studentsetting;
+use App\Models\ModuleStream;
+use App\Models\ReplayVideo;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +39,7 @@ class studentController extends Controller
 
         $student_module = COLLECT(\DB::SELECT("select distinct m.*, -- sm.remarks student_remarks,
             (CASE WHEN m.status = 1 THEN 'draft' WHEN m.status = 2 THEN 'published' WHEN m.status = 3 THEN 'archived' END) module_status,
-            (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
+            -- (CASE WHEN m.broadcast_status = 0 THEN 'start_server' WHEN m.broadcast_status = 1 THEN 'offline' WHEN m.broadcast_status = 2 THEN 'live' WHEN m.broadcast_status = 3 THEN 'pending_replay' WHEN m.broadcast_status = 4 THEN 'replay' END) broadcast_status,
             -- (CASE WHEN sm.status = 1 THEN 'active' WHEN sm.status = 2 THEN 'pending' WHEN sm.status = 3 THEN 'completed' END) student_module_status,
             m.stream_info, m.stream_json, m.uid, m.srt_url
             from modules m
@@ -473,7 +475,7 @@ class studentController extends Controller
 
         }
         
-        $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field') +
+        $student->update($request->only('name', 'email', 'phone', 'location', 'company', 'position', 'field', 'language') +
                         [ 'updated_at' => now()]
                         );
 
@@ -1052,5 +1054,52 @@ class studentController extends Controller
         // dd($modules->toArray());
 
         return response(["modules" => $modules], 200);
+    }
+
+    public function getModuleStreams(Request $request, $moduleId){
+
+        $request->query->add(['moduleId' => $moduleId]);
+        
+        $request->validate([
+            'moduleId' => 'required|exists:modules,id'
+        ]);
+        // dd($moduleId);
+        $streams = ModuleStream::where('module_id', $moduleId)
+                                ->where('status', 3)
+                                // ->whereIn('broadcast_status', [2])
+                                ->get();
+
+        return response(["streams" => $streams], 200);
+    }
+
+    public function getReplay(Request $request, $id){
+
+        // $request->query->add(['topicId' => $topicId]);
+        
+        // $request->validate([
+        //     'topicId' => 'required|exists:topics,id'
+        // ]);
+        // // dd($moduleId);
+        // $replays = ReplayVideo::where('topic_id', $topicId)
+        //                         ->where('status', 2)
+        //                         ->get();
+
+        
+        $request->query->add(['module_id' => $id]);
+
+        $request->validate([
+            'module_id' => 'required|numeric|min:1|exists:modules,id',
+        ]);
+
+        $replays = DB::TABLE('topics as t')
+                        ->leftJoin('replay_videos as rv', 't.id', '=', 'rv.topic_id')
+                        ->where('t.status', 1)
+                        ->where('rv.status', '<>', 0)
+                        ->where('t.moduleId', $id)
+                        ->select('rv.*')
+                        ->orderBy('t.id')
+                        ->get();
+
+        return response(["replays" => $replays], 200);
     }
 }
