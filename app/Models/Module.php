@@ -30,7 +30,6 @@ class Module extends Model
             $student_courses = DB::TABLE('studentcourses as sc')
                                     ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
                                     ->where('sc.studentId', $userId)
-                                    // ->where('c.is_displayed', 1)
                                     ->where('sc.status', 1)
                                     ->pluck('sc.courseId')
                                     ->toArray();
@@ -40,12 +39,10 @@ class Module extends Model
 
             $modules = DB::TABLE('courses as c')
                                 ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
-                                // ->where('c.is_displayed', 1)
                                 ->where('c.id', $course_id)
                                 ->where('c.status', '<>', 0)
                                 ->where('m.status', 2)
                                 ->whereIn('m.broadcast_status', [2])
-                                // ->where('m.end_date', '>', now())
                                 ->select('m.*', 'c.name as course_name', DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
                                 ->orderBy('m.start_date', 'asc')
                                 ->get();
@@ -135,7 +132,8 @@ class Module extends Model
 
             $check = Course::where('id', $course_id)->first();
             $userDate = auth('api')->user()->created_at;
-            // dd($check, $userDate);
+            $userLanguage = auth('api')->user()->language;
+            // dd($userLanguage);
             if($check->paid == 0){
                 $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from courses c
@@ -159,7 +157,17 @@ class Module extends Model
             
             if($modules){
                 foreach ($modules as $key => $value) {
-                    $value->description = urldecode($value->description);
+                    $translation = ModelLanguage::where("module_id", $value->id)
+                                                ->where('language', $userLanguage)
+                                                ->where('status', 1)
+                                                ->first();
+                    // dd( empty($translation) );                            
+                    if(!empty($translation)){
+                        $value->description = urldecode($translation->description);
+                        $value->name = urldecode($translation->name);
+                    }else{
+                        $value->description = urldecode($value->description);
+                    }
 
                     $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
                                         sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
