@@ -18,6 +18,7 @@ use App\Models\Studentmodule;
 use App\Models\Studentsetting;
 use App\Models\ModuleStream;
 use App\Models\ReplayVideo;
+use App\Models\ModelLanguage;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -1001,6 +1002,7 @@ class studentController extends Controller
         
         $module_per_course = env('MODULE_PER_COURSE');
         $userId = auth('api')->user()->id;
+        $userLanguage = auth('api')->user()->language;
 
         $student_courses = DB::TABLE('studentcourses as sc')
                             ->leftJoin('courses as c', 'c.id', '=', 'sc.courseId')
@@ -1027,7 +1029,17 @@ class studentController extends Controller
 
         if($modules){
             foreach ($modules as $key => $value) {
-                $value->description = urldecode($value->description);
+                $translation = ModelLanguage::where("module_id", $value->id)
+                                            ->where('language', $userLanguage)
+                                            ->where('status', 1)
+                                            ->first();
+                // dd( empty($translation) );                            
+                if(!empty($translation)){
+                    $value->description = urldecode($translation->description);
+                    $value->name = urldecode($translation->name);
+                }else{
+                    $value->description = urldecode($value->description);
+                }
 
                 $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
                                     sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
