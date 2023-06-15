@@ -36,20 +36,20 @@ class streamController extends Controller
         $cf_response_result = $response->json()['result'];
         // dd($cf_response_result['thumbnailTimestampPct'] == 0, $cf_response_result['thumbnailTimestampPct']);
 
-        // $time = now()->addHours(3);
+        $time = now()->addHours(3);
 
-        // $response_token = Http::acceptJson()->withHeaders([
-        //     'Authorization' => "Bearer $stream_api_key",
-        // ])->post($stream_link."/accounts/$stream_account_id/stream/$request->uid/token", [
-        //     'exp' => strtotime($time),
-        // ]);
+        $response_token = Http::acceptJson()->withHeaders([
+            'Authorization' => "Bearer $stream_api_key",
+        ])->post($stream_link."/accounts/$stream_account_id/stream/$request->uid/token", [
+            'exp' => strtotime($time),
+        ]);
         
-        // $token_response = $response_token->json()['result'];
+        $token_response = $response_token->json()['result'];
         // dd($token_response['token']);
 
-        // return response()->json(["access_token" => $token_response['token'], "cloudflare_replay_result" => $cf_response_result], 200);
+        return response()->json(["access_token" => $token_response['token'], "cloudflare_replay_result" => $cf_response_result], 200);
 
-        return response()->json(["cloudflare_replay_result" => $cf_response_result], 200);
+        // return response()->json(["cloudflare_replay_result" => $cf_response_result], 200);
 
 
     }
