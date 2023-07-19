@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\api\PartnershipController;
+use App\Http\Controllers\api\AffiliateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,14 +81,13 @@ Route::prefix("/student")->group( function (){
     Route::middleware("auth:api")->get("/library", "api\libraryController@index");
     Route::middleware("auth:api")->get("/library/{id}", "api\libraryController@perlLibrary");
     
-    Route::get('/affiliate', 'api\PartnershipController@partnershipApplication');
-    Route::post('/invite', "api\PartnershipController@useAffiliateCode");
+    Route::get('/affiliate', 'api\AffiliateController@affiliateApplication');
     
     Route::middleware("auth:api")->get('/download-schedule', 'api\CalendarController@downloadSchedule');
 });
 
-Route::prefix("/partnership")->controller(PartnershipController::class)->group( function() {
-    Route::post("/apply", "applyPartnership");
+Route::prefix("/affiliate")->controller(AffiliateController::class)->group( function() {
+    Route::post("/apply", "applyAffiliate");
     Route::put("/update-code", "updateAffiliateCode");
     
     Route::get("/payments", "getAffiliatePayments");
