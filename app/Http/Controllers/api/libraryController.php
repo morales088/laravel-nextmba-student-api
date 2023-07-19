@@ -22,10 +22,10 @@ class libraryController extends Controller
         $offset = $request->query('offset', ($currentPage - 1) * $perPage);
   
         $video_libraries = VideoLibrary::query();
-    
+        
         if($type == 1){
             $video_libraries = $video_libraries
-                ->where('date', '<=', $user->created_at);
+                ->where('date', '<=', $user->course_date);
         }
         
         $video_libraries = $video_libraries
@@ -41,7 +41,7 @@ class libraryController extends Controller
             ->get();
         
         $totalOrder = VideoLibrary::where('type', $type)
-            ->where('date', '<=', $user->created_at)
+            ->where('date', '<=', $user->course_date)
             // ->where( function($query) use($user) {
             //     $query->where('date', '<=', $user->created_at);
             //     $query->orWhere('category', 'additional lecture');
