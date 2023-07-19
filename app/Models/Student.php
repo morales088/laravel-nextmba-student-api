@@ -4,10 +4,10 @@ namespace App\Models;
 
 use DB;
 use App\Models\Payment;
-use App\Models\Partnership;
-use App\Models\PartnershipWithdraw;
-use Laravel\Passport\HasApiTokens;
+use App\Models\Affiliate;
+use App\Models\AffiliateWithdraw;
 // use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -21,15 +21,15 @@ class Student extends Authenticatable
     protected $guarded = ['id'];
     protected $table = 'students';
 
-    public function partnership() {
-        return $this->hasOne(Partnership::class, 'student_id');
+    public function affiliate() {
+        return $this->hasOne(Affiliate::class, 'student_id');
     }
     
-    public function partnership_withraws(){
-        return $this->hasMany(PartnershipWithdraw::class);
+    public function affiliate_withdraws(){
+        return $this->hasMany(AffiliateWithdraw::class);
     }
 
-    public function commision(){
+    public function commission(){
         return $this->hasMany(Payment::class, 'from_student_id');
     }
 

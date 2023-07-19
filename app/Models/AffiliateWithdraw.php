@@ -8,10 +8,10 @@ use App\Models\Student;
 use App\Models\Payment;
 use App\Models\User;
 
-class PartnershipWithdraw extends Model
+class AffiliateWithdraw extends Model
 {
     use HasFactory;
-    protected $table = 'partnership_withdraws';
+    protected $table = 'affiliate_withdraws';
 
     public function student() {
         return $this->belongsTo(Student::class);
