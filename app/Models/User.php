@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\AffiliateWithdraw;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use App\Models\PartnershipWithdraw;
 
 class User extends Authenticatable
 {
     // use HasApiTokens, HasFactory, Notifiable;
 
-    public function partnership_withraws(){
-        return $this->hasMany(PartnershipWithdraw::class, 'admin_id');
+    public function affiliate_withdraws(){
+        return $this->hasMany(AffiliateWithdraw::class, 'admin_id');
     }
 }
