@@ -287,7 +287,12 @@ class AffiliateController extends Controller
             ->where('commission_status', 2)
             ->sum('withdraw_amount');
 
+        $total_commission = round($total_commission, 2); 
+        $paid_commission = round($paid_commission, 2); 
+
         $current_balance = $total_commission - $paid_commission;
+
+        $current_balance = round($current_balance, 2);
         
         return response()->json([
             'message' => "Withdrawals info retrieved successfully.",
