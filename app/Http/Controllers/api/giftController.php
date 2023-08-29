@@ -307,7 +307,7 @@ class giftController extends Controller
             }
             
             // fetch the starting date and expiration date of the sender's course
-            $senderCourseDates = Studentcourse::where('studentId', $request->student_id)
+            $senderCourseDates = Studentcourse::where('studentId', $userId)
                 ->where('courseId', $request->course_id)
                 ->select('starting', 'expirationDate')
                 ->first();
@@ -318,7 +318,7 @@ class giftController extends Controller
                 'starting_date' => $senderCourseDates->starting,
                 'expiration_date' => $senderCourseDates->expirationDate,
             ];
-            
+
             // add course to student
             Studentcourse::insertStudentCourse($data);
 
