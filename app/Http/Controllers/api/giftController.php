@@ -306,10 +306,20 @@ class giftController extends Controller
 
             }
             
-            // dd($student_id, $check_available_qty, --$check_available_qty->quantity);
+            // fetch the starting date and expiration date of the sender's course
+            $senderCourseDates = Studentcourse::where('studentId', $userId)
+                ->where('courseId', $request->course_id)
+                ->select('starting', 'expirationDate')
+                ->first();
+
+            $data = [
+                'studentId' => $student_id, 
+                'courseId' => $request->course_id,
+                'starting_date' => $senderCourseDates->starting,
+                'expiration_date' => $senderCourseDates->expirationDate,
+            ];
 
             // add course to student
-            $data = ['studentId' => $student_id, 'courseId' => $request->course_id, 'qty' => 1];
             Studentcourse::insertStudentCourse($data);
 
             // set student to basic account type
