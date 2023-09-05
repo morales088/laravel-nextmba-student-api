@@ -11,14 +11,15 @@ use App\Models\Module;
 use App\Models\Student;
 use App\Models\Category;
 use App\Mail\ChangeEmail;
+use App\Models\ModuleFile;
 use App\Mail\AccountUpdate;
+use App\Models\ReplayVideo;
 use App\Mail\ForgotPassword;
+use App\Models\ModuleStream;
 use Illuminate\Http\Request;
+use App\Models\ModelLanguage;
 use App\Models\Studentmodule;
 use App\Models\Studentsetting;
-use App\Models\ModuleStream;
-use App\Models\ReplayVideo;
-use App\Models\ModelLanguage;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -1060,6 +1061,10 @@ class studentController extends Controller
                 $value->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $value->id and status <> 0");
 
                 $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
+
+                $value->module_files = ModuleFile::where('status', '<>', 0)
+                    ->where('moduleId', $value->id)
+                    ->get();
             }
         }
         

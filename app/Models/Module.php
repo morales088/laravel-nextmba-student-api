@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\Models\ModuleFile;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Module extends Model
 {
@@ -71,6 +72,10 @@ class Module extends Model
                     $value->topics = $topics;
 
                     $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
+                
+                    $value->module_files = ModuleFile::where('status', '<>', 0)
+                        ->where('moduleId', $value->id)
+                        ->get();
                 }
 
             }
@@ -116,6 +121,10 @@ class Module extends Model
                     $value->topics = $topics;
 
                     $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
+                
+                    $value->module_files = ModuleFile::where('status', '<>', 0)
+                        ->where('moduleId', $value->id)
+                        ->get();
                 }
             }
             
@@ -188,6 +197,10 @@ class Module extends Model
                     $value->extra_videos = DB::SELECT("SELECT * FROM extra_videos where moduleId = $value->id and status <> 0");
 
                     $value->category = Category::where('status', '<>', 0)->where('id', $value->category_id)->first();
+                
+                    $value->module_files = ModuleFile::where('status', '<>', 0)
+                        ->where('moduleId', $value->id)
+                        ->get();
                 }
             }
         }
