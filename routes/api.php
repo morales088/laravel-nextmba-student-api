@@ -22,6 +22,7 @@ use App\Http\Controllers\api\AffiliateController;
 
 Route::prefix("/user")->group( function (){
     Route::post("/login", "api\authorizationController@personalAccessLogin");
+    Route::post("/verify", "api\authorizationController@verifyToken");
     Route::middleware("api_token")->post("/admin-login", "api\authorizationController@adminAccessLogin");
 });
 

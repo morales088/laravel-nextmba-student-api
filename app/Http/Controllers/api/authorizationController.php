@@ -50,4 +50,12 @@ class authorizationController extends Controller
         return response()->json(["student" => $user, "access_token" => $accessToken], 200);
 
     }
+
+    public function verifyToken(Request $request){
+        if (Auth::guard('api')->check()) {
+            return response(["message" => "Valid login token"], 200);
+        } else {
+            return response(["message" => "Invalid login token"], 401);
+        }
+    }
 }
