@@ -29,10 +29,11 @@ class libraryController extends Controller
         }
         
         $video_libraries = $video_libraries
-            // ->where('date', '<=', $user->created_at)
+            // ->leftJoin('library_files as lf', 'lf.libraryId', '=', 'videoLibrary.id')
             ->where('type', $type)
             ->where('status', 1)
             ->where('broadcast_status', 1)
+            ->with('libraryFile')
             ->orderBy('date', 'DESC');
                             
         $video_libraries = $video_libraries
