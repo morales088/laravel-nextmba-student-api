@@ -849,7 +849,7 @@ class studentController extends Controller
         // } 
 
 
-        $all = DB::SELECT("SELECT *, $module_per_course as module_per_course FROM courses c where c.status <> 0");
+        $all = DB::SELECT("SELECT * FROM courses c where c.status <> 0");
             
         // foreach ($all as $key => $value) {
         //     $value->description = urldecode($value->description);
@@ -881,7 +881,10 @@ class studentController extends Controller
                                 ->where("studentId", $userId)
                                 ->where("courseId", $value->id)
                                 ->where("status", 1)
-                                ->get();
+                                ->select("sc.*", DB::RAW("TIMESTAMPDIFF(YEAR, sc.starting, sc.expirationDate) * $module_per_course AS module_per_course"))
+                                ->first();
+            // dd($student_course, empty($student_course));
+            $value->module_per_course = $student_course->module_per_course;
 
             if($value->paid == 0){
 
@@ -894,7 +897,7 @@ class studentController extends Controller
                 $value->past_module = 0;
                 $value->has_access = 1;
 
-            }elseif($student_course->isEmpty()){
+            }elseif(empty($student_course)){
 
                 $value->has_access = 0;
                 $value->past_module = 0;
@@ -1015,16 +1018,22 @@ class studentController extends Controller
 
         // dd($student_courses, implode(',', $student_courses));
         $courses = implode(',', $student_courses);
-
+        
         $modules = DB::TABLE('courses as c')
                     ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
-                    // ->where('c.is_displayed', 1)
+                    ->leftJoin('studentcourses as sc', function($join) use ($userId)
+                    {
+                        $join->on('sc.courseId', '=', 'c.id');
+                        // $join->on('sc.studentId', $userId);
+                        $join->on('sc.studentId', DB::raw('CAST(' . $userId . ' AS SIGNED)'));
+                    })
                     ->where('c.status', '<>', 0)
+                    ->where('sc.status', '<>', 0)
                     ->where('m.status', 2)
                     ->whereIn('m.broadcast_status', [1])
                     ->where('m.end_date', '>', now())
-                    ->select('m.*', 'c.name as course_name', 
-                                DB::RAW("IF(c.paid = 0, true, IF(c.id IN ($courses), true, false ) ) has_access"))
+                    ->select('m.*', 'c.name as course_name',
+                        DB::RAW("IF(c.paid = 0, true, IF(date(m.start_date) < date(sc.expirationDate), IF(c.id IN ($courses), true, false ), false ) ) has_access"))
                     ->orderBy('m.start_date', 'asc')
                     ->get();
 

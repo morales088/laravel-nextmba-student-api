@@ -129,20 +129,10 @@ class Module extends Model
             }
             
         }else{
-            // $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
-            //                             from student_modules sm
-            //                             left join students s ON s.id = sm.studentId
-            //                             left join modules m ON m.id = sm.moduleId
-            //                             left join studentcourses sc ON sc.courseId = m.courseId and sc.studentId = sm.studentId
-            //                             left join courses c on m.courseId = c.id
-            //                             where m.status = 2 and sm.status <> 0 and c.status <> 0 and sc.status <> 0
-            //                             and sm.studentId = $userId and m.broadcast_status in (3,4) and c.id = $course_id 
-            //                             and date(m.start_date) >= date(s.created_at) order by m.start_date asc");
-
             $check = Course::where('id', $course_id)->first();
             $userDate = auth('api')->user()->created_at;
             $userLanguage = auth('api')->user()->language;
-            // dd($userLanguage);
+            
             if($check->paid == 0){
                 $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
                                         from courses c
@@ -153,7 +143,8 @@ class Module extends Model
 
             }else{
 
-                $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price
+                $modules = DB::SELECT("select DISTINCT m.*, c.name course_name, c.price course_price,
+                                                IF(date(m.start_date) < date(sc.expirationDate), true, false ) has_access
                                                 from students s
                                                 left join studentcourses sc ON sc.studentId = s.id
                                                 left join courses c on c.id = sc.courseId
