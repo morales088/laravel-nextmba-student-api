@@ -320,7 +320,7 @@ class giftController extends Controller
             ];
 
             // add course to student
-            Studentcourse::insertStudentCourse($data);
+            Studentcourse::insertStudentCourse($data, 3);
 
             // set student to basic account type
             Student::studentBasicAccount($student_id);
