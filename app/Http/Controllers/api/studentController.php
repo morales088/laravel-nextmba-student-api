@@ -884,7 +884,8 @@ class studentController extends Controller
                                 ->select("sc.*", DB::RAW("TIMESTAMPDIFF(YEAR, sc.starting, sc.expirationDate) * $module_per_course AS module_per_course"))
                                 ->first();
                                 
-            $value->module_per_course = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
+            $module_count = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
+            $value->module_per_course = $module_count;
 
             if($value->paid == 0){
 
@@ -914,7 +915,7 @@ class studentController extends Controller
                                 ->whereRaw("date(m.start_date) >= date(sc.starting)")
                                 ->count();
                 
-                $value->past_module_count = $past_module;
+                $value->past_module_count = $past_module > $module_count ? $module_count : $past_module;
                 $value->has_access = 1;
 
             }
@@ -1034,6 +1035,7 @@ class studentController extends Controller
                     ->where('m.end_date', '>', now())
                     ->select('m.*', 'c.name as course_name',
                         DB::RAW("IF(c.paid = 0, true, IF(date(m.start_date) < date(sc.expirationDate), IF(c.id IN ($courses), true, false ), false ) ) has_access"))
+                    ->distinct()
                     ->orderBy('m.start_date', 'asc')
                     ->get();
 
