@@ -1051,7 +1051,7 @@ class studentController extends Controller
                                     ->first();
                 // dd($value, $student_course);
                 $has_access = $value->paid = 0 ? true : (empty($student_course) ? false : ($value->module_start_date < $student_course->module_start_date ? true : false));
-
+                $value->has_access = $has_access;
 
                 $translation = ModelLanguage::where("module_id", $value->id)
                                             ->where('language', $userLanguage)
