@@ -1047,13 +1047,14 @@ class studentController extends Controller
                 // check module access
                 $student_course = Studentcourse::where("studentId", $userId)
                                     ->where("courseId", $value->courseId)
+                                    ->where('status', 1)
                                     ->select('*', DB::RAW("date(expirationDate) student_expiration_date"))
                                     ->first();
                                     
                 $has_access = $value->paid = 0 ? 1 : (empty($student_course) ? 0 : ($value->module_start_date < $student_course->student_expiration_date ? 1 : 0));
                 $value->has_access = $has_access;
                 
-                if($key == 0) dd($value, $student_course, $value->module_start_date < $student_course->student_expiration_date);
+                dd($value, $student_course, $value->module_start_date < $student_course->student_expiration_date);
                 
 
                 $translation = ModelLanguage::where("module_id", $value->id)
