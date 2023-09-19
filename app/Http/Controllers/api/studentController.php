@@ -1050,9 +1050,11 @@ class studentController extends Controller
                                     ->select('*', DB::RAW("date(expirationDate) student_expiration_date"))
                                     ->first();
                                     
-                $has_access = $value->paid = 0 ? 1 : (empty($student_course) ? 0 : ($value->module_start_date < $student_course->student_expiration_date ? 0 : 1));
+                $has_access = $value->paid = 0 ? 1 : (empty($student_course) ? 0 : ($value->module_start_date < $student_course->student_expiration_date ? 1 : 0));
                 $value->has_access = $has_access;
-                // dd($value, $student_course, $value->module_start_date < $student_course->student_expiration_date);
+                
+                if($key == 0) dd($value, $student_course, $value->module_start_date < $student_course->student_expiration_date);
+                
 
                 $translation = ModelLanguage::where("module_id", $value->id)
                                             ->where('language', $userLanguage)
