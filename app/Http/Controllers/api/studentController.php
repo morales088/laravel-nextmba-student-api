@@ -19,6 +19,7 @@ use App\Models\ModuleStream;
 use Illuminate\Http\Request;
 use App\Models\ModelLanguage;
 use App\Models\Studentmodule;
+use App\Models\Studentcourse;
 use App\Models\Studentsetting;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
@@ -874,7 +875,7 @@ class studentController extends Controller
         //         $value->score_percentage = $check->score_percentage;
         //     }
         // }
-
+        
         foreach ($all as $key => $value) {
             
             $student_course = DB::TABLE("studentcourses as sc")
@@ -884,7 +885,8 @@ class studentController extends Controller
                                 ->select("sc.*", DB::RAW("TIMESTAMPDIFF(YEAR, sc.starting, sc.expirationDate) * $module_per_course AS module_per_course"))
                                 ->first();
                                 
-            $value->module_per_course = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
+            $module_count = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
+            $value->module_per_course = $module_count;
 
             if($value->paid == 0){
 
@@ -914,7 +916,7 @@ class studentController extends Controller
                                 ->whereRaw("date(m.start_date) >= date(sc.starting)")
                                 ->count();
                 
-                $value->past_module_count = $past_module;
+                $value->past_module_count = $past_module > $module_count ? $module_count : $past_module;
                 $value->has_access = 1;
 
             }
@@ -1021,24 +1023,36 @@ class studentController extends Controller
         
         $modules = DB::TABLE('courses as c')
                     ->leftJoin('modules as m', 'c.id', '=', 'm.courseId')
-                    ->leftJoin('studentcourses as sc', function($join) use ($userId)
-                    {
-                        $join->on('sc.courseId', '=', 'c.id');
-                        // $join->on('sc.studentId', $userId);
-                        $join->on('sc.studentId', DB::raw('CAST(' . $userId . ' AS SIGNED)'));
-                    })
+                    // ->leftJoin('studentcourses as sc', function($join) use ($userId)
+                    // {
+                    //     $join->on('sc.courseId', '=', 'c.id');
+                    //     // $join->on('sc.studentId', $userId);
+                    //     $join->on('sc.studentId', DB::raw('CAST(' . $userId . ' AS SIGNED)'));
+                    // })
                     ->where('c.status', '<>', 0)
-                    ->where('sc.status', '<>', 0)
+                    // ->where('sc.status', '<>', 0)
                     ->where('m.status', 2)
                     ->whereIn('m.broadcast_status', [1])
                     ->where('m.end_date', '>', now())
-                    ->select('m.*', 'c.name as course_name',
-                        DB::RAW("IF(c.paid = 0, true, IF(date(m.start_date) < date(sc.expirationDate), IF(c.id IN ($courses), true, false ), false ) ) has_access"))
+                    ->select('c.paid', 'm.*', 'c.name as course_name',
+                        // DB::RAW("IF(c.paid = 0, true, IF(date(m.start_date) < date(sc.expirationDate), IF(c.id IN ($courses), true, false ), false ) ) has_access")
+                        DB::RAW("date(m.start_date) module_start_date")
+                        )
+                    ->distinct()
                     ->orderBy('m.start_date', 'asc')
                     ->get();
-
+                    
         if($modules){
             foreach ($modules as $key => $value) {
+                // check module access
+                $student_course = Studentcourse::where("studentId", $userId)
+                                    ->where("courseId", $value->courseId)
+                                    ->select('*', DB::RAW("date(expirationDate) module_start_date"))
+                                    ->first();
+                // dd($value, $student_course);
+                $has_access = $value->paid = 0 ? 1 : (empty($student_course) ? 0 : ($value->module_start_date < $student_course->module_start_date ? 1 : 0));
+                $value->has_access = $has_access;
+
                 $translation = ModelLanguage::where("module_id", $value->id)
                                             ->where('language', $userLanguage)
                                             ->where('status', 1)
