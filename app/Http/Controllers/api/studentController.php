@@ -896,13 +896,13 @@ class studentController extends Controller
                                 ->whereRaw("date(m.start_date) >= date('$userDate')")
                                 ->count();
 
-                $value->past_module = 0;
+                $value->past_module_count = 0;
                 $value->has_access = 1;
 
             }elseif(empty($student_course)){
 
                 $value->has_access = 0;
-                $value->past_module = 0;
+                $value->past_module_count = 0;
 
             }else{
 
