@@ -824,7 +824,7 @@ class studentController extends Controller
             $value->expiration_date = $student_course->expirationDate;
                                 
             $module_count = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
-            $value->module_per_course = $module_count;
+            $value->module_per_course = $module_count ?? null;
 
             if($value->paid == 0){
 
