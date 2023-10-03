@@ -820,11 +820,11 @@ class studentController extends Controller
                                 ->select("sc.*", DB::RAW("TIMESTAMPDIFF(YEAR, sc.starting, sc.expirationDate) * $module_per_course AS module_per_course"))
                                 ->first();
 
-            $value->starting_date = $student_course->starting;
-            $value->expiration_date = $student_course->expirationDate;
+            $value->starting_date = $student_course->starting ?? null;
+            $value->expiration_date = $student_course->expirationDate ?? null;
                                 
             $module_count = empty($student_course->module_per_course) || $student_course->module_per_course <= 0 ? (int)$module_per_course : $student_course->module_per_course;
-            $value->module_per_course = $module_count ?? null;
+            $value->module_per_course = $module_count;
 
             if($value->paid == 0){
 
