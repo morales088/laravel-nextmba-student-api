@@ -60,7 +60,7 @@ class studentController extends Controller
         $student_module->student_module_status = $module ? $module->student_module_status : null;
         $student_module->student_remarks = $module ? $module->student_remarks : null;
 
-        $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.uid topic_uid, t.description topic_description,
+        $topics = DB::SELECT("select distinct t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.uid topic_uid, t.description topic_description, t.start_time topic_start_time, t.end_time topic_end_time,
                             s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description
                             from modules m
                             left join topics t ON m.id = t.moduleId
@@ -271,7 +271,7 @@ class studentController extends Controller
 
                 $value->description = urldecode($value->description);
 
-                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description, t.start_time topic_start_time, t.end_time topic_end_time,
                 sr.role, s.id speaker_id, s.name speaker_name, s.position speaker_positon, s.company speaker_company, s.company_path speaker_company_path, s.profile_path speaker_profile_path, s.description speaker_description,
                 (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
                 from topics t
@@ -310,7 +310,7 @@ class studentController extends Controller
                 //  dd($upcoming_modules);                       
         // foreach ($upcoming_modules as $key => $value) {
             if(!empty($upcoming_modules)){
-                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description,
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.vimeo_url topic_vimeo_url, t.description topic_description, t.start_time topic_start_time, t.end_time topic_end_time,
                                                     s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
@@ -778,7 +778,7 @@ class studentController extends Controller
                 
                 $latest_module->description = urldecode($latest_module->description);
 
-                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description,
+                $topics = DB::SELECT("SELECT t.id topic_id, t.moduleId, t.name topic_name, t.video_link topic_video_link, t.description topic_description, t.start_time topic_start_time, t.end_time topic_end_time,
                                                     s.id speaker_id, s.name speaker_name, s.position speaker_position, s.company speaker_company, s.profile_path speaker_profile_path, s.company_path speaker_company_path, s.description speaker_description,
                                                     sr.role,
                                                     (CASE WHEN sr.role = 1 THEN 'main' WHEN sr.role = 2 THEN 'guest' END) speaker_role
